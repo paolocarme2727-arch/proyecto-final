@@ -1,0 +1,1456 @@
+﻿{
+    "info":  {
+                 "name":  "Plataforma Bancaria - Pruebas de negocio Parte III",
+                 "schema":  "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+             },
+    "variable":  [
+                     {
+                         "key":  "baseUrl",
+                         "value":  "http://localhost:8080"
+                     },
+                     {
+                         "key":  "token",
+                         "value":  ""
+                     },
+                     {
+                         "key":  "personalCustomerId",
+                         "value":  "customer-personal-1"
+                     },
+                     {
+                         "key":  "businessCustomerId",
+                         "value":  "customer-business-1"
+                     },
+                     {
+                         "key":  "vipSavingsId",
+                         "value":  ""
+                     },
+                     {
+                         "key":  "creditCardId",
+                         "value":  ""
+                     },
+                     {
+                         "key":  "sourceAccountId",
+                         "value":  ""
+                     },
+                     {
+                         "key":  "targetAccountId",
+                         "value":  ""
+                     },
+                     {
+                         "key":  "debitCardId",
+                         "value":  ""
+                     },
+                     {
+                         "key":  "walletSourceId",
+                         "value":  ""
+                     },
+                     {
+                         "key":  "walletTargetId",
+                         "value":  ""
+                     },
+                     {
+                         "key":  "customerCrudId",
+                         "value":  ""
+                     },
+                     {
+                         "key":  "businessCreditCardId",
+                         "value":  ""
+                     },
+                     {
+                         "key":  "creditCrudId",
+                         "value":  ""
+                     },
+                     {
+                         "key":  "accountCrudId",
+                         "value":  ""
+                     },
+                     {
+                         "key":  "accountProductType",
+                         "value":  "SAVINGS"
+                     },
+                     {
+                         "key":  "creditProductType",
+                         "value":  "PERSONAL_CREDIT_CARD"
+                     },
+                     {
+                         "key":  "vipCustomerId",
+                         "value":  ""
+                     },
+                     {
+                         "key":  "runSuffix",
+                         "value":  ""
+                     },
+                     {
+                         "key":  "phoneSeed",
+                         "value":  ""
+                     },
+                     {
+                         "key":  "targetCustomerId",
+                         "value":  ""
+                     },
+                     {
+                         "key":  "targetDebitCardId",
+                         "value":  ""
+                     },
+                     {
+                         "key":  "walletSourcePhone",
+                         "value":  ""
+                     },
+                     {
+                         "key":  "walletTargetPhone",
+                         "value":  ""
+                     }
+                 ],
+    "item":  [
+                 {
+                     "name":  "01 Autenticacion",
+                     "item":  [
+                                  {
+                                      "name":  "Generar token JWT",
+                                      "event":  [
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "exec":  [
+                                                                                    "pm.test(\u0027token generado\u0027, () =\u003e pm.response.to.have.status(200));",
+                                                                                    "pm.collectionVariables.set(\u0027token\u0027, pm.response.json().accessToken);",
+                                                                                    "const suffix = Date.now().toString();",
+                                                                                    "const phoneSeed = suffix.slice(-7);",
+                                                                                    "pm.collectionVariables.set(\u0027runSuffix\u0027, suffix);",
+                                                                                    "pm.collectionVariables.set(\u0027phoneSeed\u0027, phoneSeed);",
+                                                                                    "pm.collectionVariables.set(\u0027walletSourcePhone\u0027, \u002794\u0027 + phoneSeed);",
+                                                                                    "pm.collectionVariables.set(\u0027walletTargetPhone\u0027, \u002795\u0027 + phoneSeed);",
+                                                                                    "pm.collectionVariables.set(\u0027targetDebitCardId\u0027, \u0027\u0027);",
+                                                                                    "pm.collectionVariables.set(\u0027walletSourceId\u0027, \u0027\u0027);",
+                                                                                    "pm.collectionVariables.set(\u0027walletTargetId\u0027, \u0027\u0027);"
+                                                                                ],
+                                                                       "type":  "text/javascript"
+                                                                   }
+                                                    }
+                                                ],
+                                      "request":  {
+                                                      "method":  "POST",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json"
+                                                                     }
+                                                                 ],
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\n  \"username\": \"demo\",\n  \"roles\": [\"USER\"]\n}"
+                                                               },
+                                                      "url":  "{{baseUrl}}/api/v1/auth/token"
+                                                  }
+                                  }
+                              ]
+                 },
+                 {
+                     "name":  "02 Clientes",
+                     "item":  [
+                                  {
+                                      "name":  "Crear cliente personal VIP",
+                                      "event":  [
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "exec":  [
+                                                                                    "pm.test(\u0027cliente VIP creado\u0027, () =\u003e pm.response.to.have.status(201));",
+                                                                                    "pm.collectionVariables.set(\u0027personalCustomerId\u0027, pm.response.json().id);",
+                                                                                    "pm.collectionVariables.set(\u0027vipCustomerId\u0027, pm.response.json().id);"
+                                                                                ],
+                                                                       "type":  "text/javascript"
+                                                                   }
+                                                    }
+                                                ],
+                                      "request":  {
+                                                      "method":  "POST",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Authorization",
+                                                                         "value":  "Bearer {{token}}"
+                                                                     },
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json"
+                                                                     }
+                                                                 ],
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\n  \"type\": \"PERSONAL\",\n  \"profile\": \"VIP\",\n  \"documentNumber\": \"DNI-VIP-MANUAL-{{runSuffix}}\",\n  \"legalName\": \"VIP Manual {{runSuffix}}\",\n  \"email\": \"vip.manual.{{runSuffix}}@example.com\",\n  \"phoneNumber\": \"91{{phoneSeed}}\"\n}"
+                                                               },
+                                                      "url":  "{{baseUrl}}/api/v1/customers"
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Crear cliente personal destino",
+                                      "event":  [
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "exec":  [
+                                                                                    "pm.test(\u0027cliente destino creado\u0027, () =\u003e pm.response.to.have.status(201));",
+                                                                                    "pm.collectionVariables.set(\u0027targetCustomerId\u0027, pm.response.json().id);"
+                                                                                ],
+                                                                       "type":  "text/javascript"
+                                                                   }
+                                                    }
+                                                ],
+                                      "request":  {
+                                                      "method":  "POST",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Authorization",
+                                                                         "value":  "Bearer {{token}}"
+                                                                     },
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json"
+                                                                     }
+                                                                 ],
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\n  \"type\": \"PERSONAL\",\n  \"profile\": \"REGULAR\",\n  \"documentNumber\": \"DNI-TARGET-MANUAL-{{runSuffix}}\",\n  \"legalName\": \"Cliente Destino Manual {{runSuffix}}\",\n  \"email\": \"destino.manual.{{runSuffix}}@example.com\",\n  \"phoneNumber\": \"96{{phoneSeed}}\"\n}"
+                                                               },
+                                                      "url":  "{{baseUrl}}/api/v1/customers"
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Crear cliente empresarial PYME",
+                                      "event":  [
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "exec":  [
+                                                                                    "pm.test(\u0027cliente PYME creado\u0027, () =\u003e pm.response.to.have.status(201));",
+                                                                                    "pm.collectionVariables.set(\u0027businessCustomerId\u0027, pm.response.json().id);"
+                                                                                ],
+                                                                       "type":  "text/javascript"
+                                                                   }
+                                                    }
+                                                ],
+                                      "request":  {
+                                                      "method":  "POST",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Authorization",
+                                                                         "value":  "Bearer {{token}}"
+                                                                     },
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json"
+                                                                     }
+                                                                 ],
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\n  \"type\": \"BUSINESS\",\n  \"profile\": \"PYME\",\n  \"documentNumber\": \"RUC-PYME-MANUAL-{{runSuffix}}\",\n  \"legalName\": \"PYME Manual {{runSuffix}}\",\n  \"email\": \"pyme.manual.{{runSuffix}}@example.com\",\n  \"phoneNumber\": \"92{{phoneSeed}}\"\n}"
+                                                               },
+                                                      "url":  "{{baseUrl}}/api/v1/customers"
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Listar clientes",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Authorization",
+                                                                         "value":  "Bearer {{token}}"
+                                                                     }
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/v1/customers"
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Consultar cliente VIP por id",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Authorization",
+                                                                         "value":  "Bearer {{token}}"
+                                                                     }
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/v1/customers/{{personalCustomerId}}"
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Crear cliente para CRUD",
+                                      "request":  {
+                                                      "method":  "POST",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Authorization",
+                                                                         "value":  "Bearer {{token}}"
+                                                                     },
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json"
+                                                                     }
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/v1/customers",
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\n  \"type\": \"PERSONAL\",\n  \"profile\": \"REGULAR\",\n  \"documentNumber\": \"DNI-CRUD-MANUAL-{{runSuffix}}\",\n  \"legalName\": \"CRUD Manual {{runSuffix}}\",\n  \"email\": \"crud.manual.{{runSuffix}}@example.com\",\n  \"phoneNumber\": \"93{{phoneSeed}}\"\n}"
+                                                               }
+                                                  },
+                                      "event":  [
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "exec":  [
+                                                                                    "pm.test(\u0027customer for CRUD created\u0027, () =\u003e pm.response.to.have.status(201));",
+                                                                                    "pm.collectionVariables.set(\u0027customerCrudId\u0027, pm.response.json().id);"
+                                                                                ],
+                                                                       "type":  "text/javascript"
+                                                                   }
+                                                    }
+                                                ]
+                                  },
+                                  {
+                                      "name":  "Consultar cliente CRUD por id",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Authorization",
+                                                                         "value":  "Bearer {{token}}"
+                                                                     }
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/v1/customers/{{customerCrudId}}"
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Actualizar cliente CRUD",
+                                      "request":  {
+                                                      "method":  "PUT",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Authorization",
+                                                                         "value":  "Bearer {{token}}"
+                                                                     },
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json"
+                                                                     }
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/v1/customers/{{customerCrudId}}",
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\n  \"type\": \"PERSONAL\",\n  \"profile\": \"REGULAR\",\n  \"documentNumber\": \"DNI-CRUD-MANUAL-{{runSuffix}}\",\n  \"legalName\": \"CRUD Manual Actualizado {{runSuffix}}\",\n  \"email\": \"crud.manual.actualizado.{{runSuffix}}@example.com\",\n  \"phoneNumber\": \"97{{phoneSeed}}\"\n}"
+                                                               }
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Eliminar cliente CRUD",
+                                      "request":  {
+                                                      "method":  "DELETE",
+                                                      "header":  {
+                                                                     "key":  "Authorization",
+                                                                     "value":  "Bearer {{token}}"
+                                                                 },
+                                                      "url":  "{{baseUrl}}/api/v1/customers/{{customerCrudId}}"
+                                                  }
+                                  }
+                              ]
+                 },
+                 {
+                     "name":  "03 Validaciones de cuentas",
+                     "item":  [
+                                  {
+                                      "name":  "Intentar crear cuenta VIP sin tarjeta",
+                                      "request":  {
+                                                      "method":  "POST",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Authorization",
+                                                                         "value":  "Bearer {{token}}"
+                                                                     },
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json"
+                                                                     }
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/v1/accounts",
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\n  \"customerId\": \"{{vipCustomerId}}\",\n  \"customerType\": \"PERSONAL\",\n  \"customerProfile\": \"VIP\",\n  \"type\": \"SAVINGS\",\n  \"initialBalance\": 700,\n  \"minimumOpeningAmount\": 0\n}"
+                                                               }
+                                                  },
+                                      "event":  [
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "exec":  [
+                                                                                    "pm.test(\u0027rechaza VIP sin tarjeta con 400\u0027, () =\u003e pm.response.to.have.status(400));"
+                                                                                ],
+                                                                       "type":  "text/javascript"
+                                                                   }
+                                                    }
+                                                ]
+                                  }
+                              ]
+                 },
+                 {
+                     "name":  "04 Productos de credito",
+                     "item":  [
+                                  {
+                                      "name":  "Crear tarjeta de credito personal",
+                                      "event":  [
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "exec":  [
+                                                                                    "pm.test(\u0027tarjeta de credito creada\u0027, () =\u003e pm.response.to.have.status(201));",
+                                                                                    "pm.collectionVariables.set(\u0027creditCardId\u0027, pm.response.json().id);"
+                                                                                ],
+                                                                       "type":  "text/javascript"
+                                                                   }
+                                                    }
+                                                ],
+                                      "request":  {
+                                                      "method":  "POST",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Authorization",
+                                                                         "value":  "Bearer {{token}}"
+                                                                     },
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json"
+                                                                     }
+                                                                 ],
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\n  \"customerId\": \"{{vipCustomerId}}\",\n  \"customerType\": \"PERSONAL\",\n  \"type\": \"PERSONAL_CREDIT_CARD\",\n  \"creditLimit\": 3000,\n  \"initialDebt\": 0,\n  \"overdueDebt\": false\n}"
+                                                               },
+                                                      "url":  "{{baseUrl}}/api/v1/credits"
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Registrar consumo de tarjeta de credito",
+                                      "request":  {
+                                                      "method":  "POST",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Authorization",
+                                                                         "value":  "Bearer {{token}}"
+                                                                     },
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json"
+                                                                     }
+                                                                 ],
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\n  \"amount\": 120\n}"
+                                                               },
+                                                      "url":  "{{baseUrl}}/api/v1/credits/{{creditCardId}}/charges"
+                                                  },
+                                      "event":  [
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "exec":  [
+                                                                                    "pm.test(\u0027respuesta exitosa\u0027, () =\u003e pm.response.to.have.status(200));"
+                                                                                ],
+                                                                       "type":  "text/javascript"
+                                                                   }
+                                                    }
+                                                ]
+                                  },
+                                  {
+                                      "name":  "Pagar credito de tercero",
+                                      "request":  {
+                                                      "method":  "POST",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Authorization",
+                                                                         "value":  "Bearer {{token}}"
+                                                                     },
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json"
+                                                                     }
+                                                                 ],
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\n  \"amount\": 20\n}"
+                                                               },
+                                                      "url":  "{{baseUrl}}/api/v1/credits/{{creditCardId}}/payments"
+                                                  },
+                                      "event":  [
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "exec":  [
+                                                                                    "pm.test(\u0027respuesta exitosa\u0027, () =\u003e pm.response.to.have.status(200));"
+                                                                                ],
+                                                                       "type":  "text/javascript"
+                                                                   }
+                                                    }
+                                                ]
+                                  },
+                                  {
+                                      "name":  "Listar productos de credito",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Authorization",
+                                                                         "value":  "Bearer {{token}}"
+                                                                     }
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/v1/credits"
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Consultar tarjeta de credito por id",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Authorization",
+                                                                         "value":  "Bearer {{token}}"
+                                                                     }
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/v1/credits/{{creditCardId}}"
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Consultar saldo de tarjeta de credito",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Authorization",
+                                                                         "value":  "Bearer {{token}}"
+                                                                     }
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/v1/credits/{{creditCardId}}/balance"
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Listar movimientos de tarjeta de credito",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Authorization",
+                                                                         "value":  "Bearer {{token}}"
+                                                                     }
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/v1/credits/{{creditCardId}}/movements"
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Validar si cliente tiene tarjeta de credito",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Authorization",
+                                                                         "value":  "Bearer {{token}}"
+                                                                     }
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/v1/credits/customers/{{personalCustomerId}}/credit-card-exists"
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Crear tarjeta de credito empresarial",
+                                      "request":  {
+                                                      "method":  "POST",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Authorization",
+                                                                         "value":  "Bearer {{token}}"
+                                                                     },
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json"
+                                                                     }
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/v1/credits",
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\n  \"customerId\": \"{{businessCustomerId}}\",\n  \"customerType\": \"BUSINESS\",\n  \"type\": \"BUSINESS_CREDIT_CARD\",\n  \"creditLimit\": 10000,\n  \"initialDebt\": 0,\n  \"overdueDebt\": false\n}"
+                                                               }
+                                                  },
+                                      "event":  [
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "exec":  [
+                                                                                    "pm.test(\u0027business credit card created\u0027, () =\u003e pm.response.to.have.status(201));",
+                                                                                    "pm.collectionVariables.set(\u0027businessCreditCardId\u0027, pm.response.json().id);"
+                                                                                ],
+                                                                       "type":  "text/javascript"
+                                                                   }
+                                                    }
+                                                ]
+                                  },
+                                  {
+                                      "name":  "Crear producto de credito para CRUD",
+                                      "request":  {
+                                                      "method":  "POST",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Authorization",
+                                                                         "value":  "Bearer {{token}}"
+                                                                     },
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json"
+                                                                     }
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/v1/credits",
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\n  \"customerId\": \"{{businessCustomerId}}\",\n  \"customerType\": \"BUSINESS\",\n  \"type\": \"BUSINESS_LOAN\",\n  \"creditLimit\": 5000,\n  \"initialDebt\": 1000,\n  \"overdueDebt\": false\n}"
+                                                               }
+                                                  },
+                                      "event":  [
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "exec":  [
+                                                                                    "pm.test(\u0027credit product for CRUD created\u0027, () =\u003e pm.response.to.have.status(201));",
+                                                                                    "pm.collectionVariables.set(\u0027creditCrudId\u0027, pm.response.json().id);"
+                                                                                ],
+                                                                       "type":  "text/javascript"
+                                                                   }
+                                                    }
+                                                ]
+                                  },
+                                  {
+                                      "name":  "Consultar credito CRUD por id",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Authorization",
+                                                                         "value":  "Bearer {{token}}"
+                                                                     }
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/v1/credits/{{creditCrudId}}"
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Actualizar credito CRUD",
+                                      "request":  {
+                                                      "method":  "PUT",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Authorization",
+                                                                         "value":  "Bearer {{token}}"
+                                                                     },
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json"
+                                                                     }
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/v1/credits/{{creditCrudId}}",
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\n  \"customerId\": \"{{businessCustomerId}}\",\n  \"customerType\": \"BUSINESS\",\n  \"type\": \"BUSINESS_LOAN\",\n  \"creditLimit\": 6000,\n  \"initialDebt\": 800,\n  \"overdueDebt\": false\n}"
+                                                               }
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Eliminar credito CRUD",
+                                      "request":  {
+                                                      "method":  "DELETE",
+                                                      "header":  {
+                                                                     "key":  "Authorization",
+                                                                     "value":  "Bearer {{token}}"
+                                                                 },
+                                                      "url":  "{{baseUrl}}/api/v1/credits/{{creditCrudId}}"
+                                                  }
+                                  }
+                              ]
+                 },
+                 {
+                     "name":  "05 Cuentas y transferencias",
+                     "item":  [
+                                  {
+                                      "name":  "Crear cuenta de ahorro VIP",
+                                      "event":  [
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "exec":  [
+                                                                                    "pm.test(\u0027cuenta VIP creada\u0027, () =\u003e pm.response.to.have.status(201));",
+                                                                                    "pm.collectionVariables.set(\u0027sourceAccountId\u0027, pm.response.json().id);",
+                                                                                    "pm.collectionVariables.set(\u0027vipSavingsId\u0027, pm.response.json().id);"
+                                                                                ],
+                                                                       "type":  "text/javascript"
+                                                                   }
+                                                    }
+                                                ],
+                                      "request":  {
+                                                      "method":  "POST",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Authorization",
+                                                                         "value":  "Bearer {{token}}"
+                                                                     },
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json"
+                                                                     }
+                                                                 ],
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\n  \"customerId\": \"{{vipCustomerId}}\",\n  \"customerType\": \"PERSONAL\",\n  \"customerProfile\": \"VIP\",\n  \"type\": \"SAVINGS\",\n  \"initialBalance\": 1000,\n  \"minimumOpeningAmount\": 0,\n  \"holders\": [],\n  \"authorizedSigners\": []\n}"
+                                                               },
+                                                      "url":  "{{baseUrl}}/api/v1/accounts"
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Retirar de cuenta VIP y rechazar por promedio minimo",
+                                      "event":  [
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "exec":  [
+                                                                                    "pm.test(\u0027withdrawal rejected by VIP daily average rule\u0027, () =\u003e pm.response.to.have.status(400));"
+                                                                                ],
+                                                                       "type":  "text/javascript"
+                                                                   }
+                                                    }
+                                                ],
+                                      "request":  {
+                                                      "method":  "POST",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Authorization",
+                                                                         "value":  "Bearer {{token}}"
+                                                                     },
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json"
+                                                                     }
+                                                                 ],
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\n  \"amount\": 600\n}"
+                                                               },
+                                                      "url":  "{{baseUrl}}/api/v1/accounts/{{vipSavingsId}}/withdrawals"
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Crear cuenta corriente destino",
+                                      "event":  [
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "exec":  [
+                                                                                    "pm.test(\u0027target account created\u0027, () =\u003e pm.response.to.have.status(201));",
+                                                                                    "pm.collectionVariables.set(\u0027targetAccountId\u0027, pm.response.json().id);"
+                                                                                ],
+                                                                       "type":  "text/javascript"
+                                                                   }
+                                                    }
+                                                ],
+                                      "request":  {
+                                                      "method":  "POST",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Authorization",
+                                                                         "value":  "Bearer {{token}}"
+                                                                     },
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json"
+                                                                     }
+                                                                 ],
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\n  \"customerId\": \"{{targetCustomerId}}\",\n  \"customerType\": \"PERSONAL\",\n  \"customerProfile\": \"REGULAR\",\n  \"type\": \"CHECKING\",\n  \"initialBalance\": 200,\n  \"minimumOpeningAmount\": 0,\n  \"holders\": [],\n  \"authorizedSigners\": []\n}"
+                                                               },
+                                                      "url":  "{{baseUrl}}/api/v1/accounts"
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Transferir a tercero del mismo banco",
+                                      "request":  {
+                                                      "method":  "POST",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Authorization",
+                                                                         "value":  "Bearer {{token}}"
+                                                                     },
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json"
+                                                                     }
+                                                                 ],
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\n  \"sourceAccountId\": \"{{sourceAccountId}}\",\n  \"targetAccountId\": \"{{targetAccountId}}\",\n  \"amount\": 50,\n  \"description\": \"third party transfer\"\n}"
+                                                               },
+                                                      "url":  "{{baseUrl}}/api/v1/accounts/transfers"
+                                                  },
+                                      "event":  [
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "exec":  [
+                                                                                    "pm.test(\u0027transferencia realizada\u0027, () =\u003e pm.response.to.have.status(200));",
+                                                                                    "pm.test(\u0027saldo origen actualizado\u0027, () =\u003e pm.expect(pm.response.json().sourceBalance).to.eql(950));",
+                                                                                    "pm.test(\u0027saldo destino actualizado\u0027, () =\u003e pm.expect(pm.response.json().targetBalance).to.eql(250));"
+                                                                                ],
+                                                                       "type":  "text/javascript"
+                                                                   }
+                                                    }
+                                                ]
+                                  },
+                                  {
+                                      "name":  "Listar cuentas",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Authorization",
+                                                                         "value":  "Bearer {{token}}"
+                                                                     }
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/v1/accounts"
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Consultar cuenta VIP por id",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Authorization",
+                                                                         "value":  "Bearer {{token}}"
+                                                                     }
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/v1/accounts/{{sourceAccountId}}"
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Depositar en cuenta VIP",
+                                      "request":  {
+                                                      "method":  "POST",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Authorization",
+                                                                         "value":  "Bearer {{token}}"
+                                                                     },
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json"
+                                                                     }
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/v1/accounts/{{sourceAccountId}}/deposits",
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\n  \"amount\": 100\n}"
+                                                               }
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Consultar saldo de cuenta VIP",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Authorization",
+                                                                         "value":  "Bearer {{token}}"
+                                                                     }
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/v1/accounts/{{sourceAccountId}}/balance"
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Listar movimientos de cuenta VIP",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Authorization",
+                                                                         "value":  "Bearer {{token}}"
+                                                                     }
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/v1/accounts/{{sourceAccountId}}/movements"
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Crear cuenta para CRUD",
+                                      "request":  {
+                                                      "method":  "POST",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Authorization",
+                                                                         "value":  "Bearer {{token}}"
+                                                                     },
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json"
+                                                                     }
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/v1/accounts",
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\n  \"customerId\": \"{{businessCustomerId}}\",\n  \"customerType\": \"BUSINESS\",\n  \"customerProfile\": \"PYME\",\n  \"type\": \"CHECKING\",\n  \"initialBalance\": 500,\n  \"minimumOpeningAmount\": 0,\n  \"holders\": [\"{{businessCustomerId}}\"],\n  \"authorizedSigners\": []\n}"
+                                                               }
+                                                  },
+                                      "event":  [
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "exec":  [
+                                                                                    "pm.test(\u0027account for CRUD created\u0027, () =\u003e pm.response.to.have.status(201));",
+                                                                                    "pm.collectionVariables.set(\u0027accountCrudId\u0027, pm.response.json().id);"
+                                                                                ],
+                                                                       "type":  "text/javascript"
+                                                                   }
+                                                    }
+                                                ]
+                                  },
+                                  {
+                                      "name":  "Consultar cuenta CRUD por id",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Authorization",
+                                                                         "value":  "Bearer {{token}}"
+                                                                     }
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/v1/accounts/{{accountCrudId}}"
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Actualizar cuenta CRUD",
+                                      "request":  {
+                                                      "method":  "PUT",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Authorization",
+                                                                         "value":  "Bearer {{token}}"
+                                                                     },
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json"
+                                                                     }
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/v1/accounts/{{accountCrudId}}",
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\n  \"customerId\": \"{{businessCustomerId}}\",\n  \"customerType\": \"BUSINESS\",\n  \"customerProfile\": \"PYME\",\n  \"type\": \"CHECKING\",\n  \"initialBalance\": 700,\n  \"minimumOpeningAmount\": 0,\n  \"holders\": [\"{{businessCustomerId}}\"],\n  \"authorizedSigners\": [\"authorized-signer-1\"]\n}"
+                                                               }
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Eliminar cuenta CRUD",
+                                      "request":  {
+                                                      "method":  "DELETE",
+                                                      "header":  {
+                                                                     "key":  "Authorization",
+                                                                     "value":  "Bearer {{token}}"
+                                                                 },
+                                                      "url":  "{{baseUrl}}/api/v1/accounts/{{accountCrudId}}"
+                                                  }
+                                  }
+                              ]
+                 },
+                 {
+                     "name":  "06 Tarjetas de debito",
+                     "item":  [
+                                  {
+                                      "name":  "Crear tarjeta de debito",
+                                      "event":  [
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "exec":  [
+                                                                                    "pm.test(\u0027debit card created\u0027, () =\u003e pm.response.to.have.status(201));",
+                                                                                    "pm.collectionVariables.set(\u0027debitCardId\u0027, pm.response.json().id);"
+                                                                                ],
+                                                                       "type":  "text/javascript"
+                                                                   }
+                                                    }
+                                                ],
+                                      "request":  {
+                                                      "method":  "POST",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Authorization",
+                                                                         "value":  "Bearer {{token}}"
+                                                                     },
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json"
+                                                                     }
+                                                                 ],
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\n  \"customerId\": \"{{personalCustomerId}}\",\n  \"accountId\": \"{{sourceAccountId}}\",\n  \"cardNumber\": \"4111{{runSuffix}}\"\n}"
+                                                               },
+                                                      "url":  "{{baseUrl}}/api/v1/accounts/debit-cards"
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Crear tarjeta de debito destino",
+                                      "event":  [
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "exec":  [
+                                                                                    "pm.test(\u0027target debit card created\u0027, () =\u003e pm.response.to.have.status(201));",
+                                                                                    "pm.collectionVariables.set(\u0027targetDebitCardId\u0027, pm.response.json().id);"
+                                                                                ],
+                                                                       "type":  "text/javascript"
+                                                                   }
+                                                    }
+                                                ],
+                                      "request":  {
+                                                      "method":  "POST",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Authorization",
+                                                                         "value":  "Bearer {{token}}"
+                                                                     },
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json"
+                                                                     }
+                                                                 ],
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\n  \"customerId\": \"{{targetCustomerId}}\",\n  \"accountId\": \"{{targetAccountId}}\",\n  \"cardNumber\": \"4222{{runSuffix}}\"\n}"
+                                                               },
+                                                      "url":  "{{baseUrl}}/api/v1/accounts/debit-cards"
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Pagar con tarjeta de debito",
+                                      "request":  {
+                                                      "method":  "POST",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Authorization",
+                                                                         "value":  "Bearer {{token}}"
+                                                                     },
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json"
+                                                                     }
+                                                                 ],
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\n  \"amount\": 30,\n  \"merchant\": \"Store\"\n}"
+                                                               },
+                                                      "url":  "{{baseUrl}}/api/v1/accounts/debit-cards/{{debitCardId}}/payments"
+                                                  },
+                                      "event":  [
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "exec":  [
+                                                                                    "pm.test(\u0027respuesta exitosa\u0027, () =\u003e pm.response.to.have.status(200));"
+                                                                                ],
+                                                                       "type":  "text/javascript"
+                                                                   }
+                                                    }
+                                                ]
+                                  }
+                              ]
+                 },
+                 {
+                     "name":  "07 Monedero Yanki",
+                     "item":  [
+                                  {
+                                      "name":  "Crear monedero origen",
+                                      "event":  [
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "exec":  [
+                                                                                    "pm.test(\u0027source wallet created\u0027, () =\u003e pm.response.to.have.status(201));",
+                                                                                    "pm.collectionVariables.set(\u0027walletSourceId\u0027, pm.response.json().id);",
+                                                                                    "pm.collectionVariables.set(\u0027walletSourcePhone\u0027, pm.response.json().phoneNumber);"
+                                                                                ],
+                                                                       "type":  "text/javascript"
+                                                                   }
+                                                    }
+                                                ],
+                                      "request":  {
+                                                      "method":  "POST",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Authorization",
+                                                                         "value":  "Bearer {{token}}"
+                                                                     },
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json"
+                                                                     }
+                                                                 ],
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\n  \"documentType\": \"DNI\",\n  \"documentNumber\": \"WALLET-SRC-MANUAL-{{runSuffix}}\",\n  \"phoneNumber\": \"{{walletSourcePhone}}\",\n  \"imei\": \"IMEI-SRC-{{runSuffix}}\",\n  \"email\": \"wallet.source.{{runSuffix}}@example.com\"\n}"
+                                                               },
+                                                      "url":  "{{baseUrl}}/api/v1/wallets"
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Crear monedero destino",
+                                      "event":  [
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "exec":  [
+                                                                                    "pm.test(\u0027target wallet created\u0027, () =\u003e pm.response.to.have.status(201));",
+                                                                                    "pm.collectionVariables.set(\u0027walletTargetId\u0027, pm.response.json().id);",
+                                                                                    "pm.collectionVariables.set(\u0027walletTargetPhone\u0027, pm.response.json().phoneNumber);"
+                                                                                ],
+                                                                       "type":  "text/javascript"
+                                                                   }
+                                                    }
+                                                ],
+                                      "request":  {
+                                                      "method":  "POST",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Authorization",
+                                                                         "value":  "Bearer {{token}}"
+                                                                     },
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json"
+                                                                     }
+                                                                 ],
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\n  \"documentType\": \"CEX\",\n  \"documentNumber\": \"WALLET-TGT-MANUAL-{{runSuffix}}\",\n  \"phoneNumber\": \"{{walletTargetPhone}}\",\n  \"imei\": \"IMEI-TGT-{{runSuffix}}\",\n  \"email\": \"wallet.target.{{runSuffix}}@example.com\"\n}"
+                                                               },
+                                                      "url":  "{{baseUrl}}/api/v1/wallets"
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Esperar catalogo de tarjetas de debito",
+                                      "event":  [
+                                                    {
+                                                        "listen":  "prerequest",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "const waitUntil = Date.now() + 5000;",
+                                                                                    "while (Date.now() \u003c waitUntil) { }"
+                                                                                ]
+                                                                   }
+                                                    },
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "pm.test(\u0027gateway disponible despues de espera\u0027, () =\u003e pm.response.to.have.status(200));"
+                                                                                ]
+                                                                   }
+                                                    }
+                                                ],
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "header":  [
+
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/actuator/health"
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Asociar monedero a tarjeta de debito",
+                                      "request":  {
+                                                      "method":  "PUT",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Authorization",
+                                                                         "value":  "Bearer {{token}}"
+                                                                     },
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json"
+                                                                     }
+                                                                 ],
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\n  \"debitCardId\": \"{{debitCardId}}\"\n}"
+                                                               },
+                                                      "url":  "{{baseUrl}}/api/v1/wallets/{{walletSourceId}}/debit-card"
+                                                  },
+                                      "event":  [
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "exec":  [
+                                                                                    "pm.test(\u0027monedero origen asociado a tarjeta\u0027, () =\u003e pm.response.to.have.status(200));"
+                                                                                ],
+                                                                       "type":  "text/javascript"
+                                                                   }
+                                                    }
+                                                ]
+                                  },
+                                  {
+                                      "name":  "Asociar monedero destino a tarjeta de debito",
+                                      "request":  {
+                                                      "method":  "PUT",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Authorization",
+                                                                         "value":  "Bearer {{token}}"
+                                                                     },
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json"
+                                                                     }
+                                                                 ],
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\n  \"debitCardId\": \"{{targetDebitCardId}}\"\n}"
+                                                               },
+                                                      "url":  "{{baseUrl}}/api/v1/wallets/{{walletTargetId}}/debit-card"
+                                                  },
+                                      "event":  [
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "exec":  [
+                                                                                    "pm.test(\u0027monedero destino asociado a tarjeta\u0027, () =\u003e pm.response.to.have.status(200));"
+                                                                                ],
+                                                                       "type":  "text/javascript"
+                                                                   }
+                                                    }
+                                                ]
+                                  },
+                                  {
+                                      "name":  "Listar monederos",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Authorization",
+                                                                         "value":  "Bearer {{token}}"
+                                                                     }
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/v1/wallets"
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Consultar monedero origen por id",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Authorization",
+                                                                         "value":  "Bearer {{token}}"
+                                                                     }
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/v1/wallets/{{walletSourceId}}"
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Enviar pago Yanki",
+                                      "request":  {
+                                                      "method":  "POST",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Authorization",
+                                                                         "value":  "Bearer {{token}}"
+                                                                     },
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json"
+                                                                     }
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/v1/wallets/payments",
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\n  \"sourcePhoneNumber\": \"{{walletSourcePhone}}\",\n  \"targetPhoneNumber\": \"{{walletTargetPhone}}\",\n  \"amount\": 10,\n  \"description\": \"Yanki manual payment {{runSuffix}}\"\n}"
+                                                               }
+                                                  },
+                                      "event":  [
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "exec":  [
+                                                                                    "pm.test(\u0027pago Yanki enviado\u0027, () =\u003e pm.response.to.have.status(200));",
+                                                                                    "pm.test(\u0027saldo interno origen en cero si tiene tarjeta vinculada\u0027, () =\u003e pm.expect(pm.response.json().sourceBalance).to.eql(0));",
+                                                                                    "pm.test(\u0027saldo interno destino en cero si tiene tarjeta vinculada\u0027, () =\u003e pm.expect(pm.response.json().targetBalance).to.eql(0));"
+                                                                                ],
+                                                                       "type":  "text/javascript"
+                                                                   }
+                                                    }
+                                                ]
+                                  }
+                              ]
+                 },
+                 {
+                     "name":  "08 Reportes",
+                     "item":  [
+                                  {
+                                      "name":  "Reporte general de cuentas por producto",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Authorization",
+                                                                         "value":  "Bearer {{token}}"
+                                                                     }
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/v1/accounts/reports/products/{{accountProductType}}?from=2026-01-01T00:00:00Z\u0026to=2026-12-31T23:59:59Z"
+                                                  },
+                                      "event":  [
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "exec":  [
+                                                                                    "pm.test(\u0027respuesta exitosa\u0027, () =\u003e pm.response.to.have.status(200));"
+                                                                                ],
+                                                                       "type":  "text/javascript"
+                                                                   }
+                                                    }
+                                                ]
+                                  },
+                                  {
+                                      "name":  "Ultimos 10 movimientos de tarjeta de debito",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Authorization",
+                                                                         "value":  "Bearer {{token}}"
+                                                                     }
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/v1/accounts/{{sourceAccountId}}/debit-card/movements/recent"
+                                                  },
+                                      "event":  [
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "exec":  [
+                                                                                    "pm.test(\u0027respuesta exitosa\u0027, () =\u003e pm.response.to.have.status(200));"
+                                                                                ],
+                                                                       "type":  "text/javascript"
+                                                                   }
+                                                    }
+                                                ]
+                                  },
+                                  {
+                                      "name":  "Reporte general de creditos por producto",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Authorization",
+                                                                         "value":  "Bearer {{token}}"
+                                                                     }
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/v1/credits/reports/products/{{creditProductType}}?from=2026-01-01T00:00:00Z\u0026to=2026-12-31T23:59:59Z"
+                                                  },
+                                      "event":  [
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "exec":  [
+                                                                                    "pm.test(\u0027respuesta exitosa\u0027, () =\u003e pm.response.to.have.status(200));"
+                                                                                ],
+                                                                       "type":  "text/javascript"
+                                                                   }
+                                                    }
+                                                ]
+                                  },
+                                  {
+                                      "name":  "Ultimos 10 movimientos de tarjeta de credito",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Authorization",
+                                                                         "value":  "Bearer {{token}}"
+                                                                     }
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/v1/credits/{{creditCardId}}/credit-card/movements/recent"
+                                                  },
+                                      "event":  [
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "exec":  [
+                                                                                    "pm.test(\u0027respuesta exitosa\u0027, () =\u003e pm.response.to.have.status(200));"
+                                                                                ],
+                                                                       "type":  "text/javascript"
+                                                                   }
+                                                    }
+                                                ]
+                                  }
+                              ]
+                 },
+                 {
+                     "name":  "09 Gateway fallback",
+                     "item":  [
+                                  {
+                                      "name":  "Fallback GET del gateway",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Authorization",
+                                                                         "value":  "Bearer {{token}}"
+                                                                     }
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/fallback"
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Fallback POST del gateway",
+                                      "request":  {
+                                                      "method":  "POST",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json"
+                                                                     }
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/fallback",
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{ }"
+                                                               }
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Fallback PUT del gateway",
+                                      "request":  {
+                                                      "method":  "PUT",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json"
+                                                                     }
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/fallback",
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{ }"
+                                                               }
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Fallback DELETE del gateway",
+                                      "request":  {
+                                                      "method":  "DELETE",
+                                                      "header":  [
+
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/fallback"
+                                                  }
+                                  }
+                              ]
+                 }
+             ]
+}

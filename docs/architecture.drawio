@@ -1,0 +1,245 @@
+<mxfile host="app.diagrams.net" modified="2026-06-05T22:45:00.000Z" agent="Codex" version="24.7.17">
+  <diagram id="architecture" name="Solution Architecture">
+    <mxGraphModel dx="1200" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+        <mxCell id="client" value="Postman / REST Client" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="40" y="250" width="160" height="70" as="geometry"/>
+        </mxCell>
+        <mxCell id="gateway" value="API Gateway&#xa;:8080&#xa;Spring Cloud Gateway" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="260" y="40" width="170" height="80" as="geometry"/>
+        </mxCell>
+        <mxCell id="eureka" value="Eureka Registry&#xa;:8761&#xa;Dashboard" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;" vertex="1" parent="1">
+          <mxGeometry x="40" y="40" width="170" height="80" as="geometry"/>
+        </mxCell>
+        <mxCell id="config" value="Config Server&#xa;:8888" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;" vertex="1" parent="1">
+          <mxGeometry x="470" y="40" width="170" height="70" as="geometry"/>
+        </mxCell>
+        <mxCell id="repo" value="config-repo&#xa;external properties" style="shape=folder;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+          <mxGeometry x="700" y="45" width="170" height="65" as="geometry"/>
+        </mxCell>
+        <mxCell id="customers" value="Customer Service&#xa;:8081&#xa;/api/v1/customers" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="300" y="180" width="180" height="90" as="geometry"/>
+        </mxCell>
+        <mxCell id="accounts" value="Account Service&#xa;:8082&#xa;/api/v1/accounts" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="300" y="310" width="180" height="90" as="geometry"/>
+        </mxCell>
+        <mxCell id="credits" value="Credit Service&#xa;:8083&#xa;/api/v1/credits" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="300" y="440" width="180" height="90" as="geometry"/>
+        </mxCell>
+        <mxCell id="wallets" value="Wallet Service&#xa;:8084&#xa;/api/v1/wallets" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="300" y="560" width="180" height="90" as="geometry"/>
+        </mxCell>
+        <mxCell id="kafka" value="Kafka&#xa;domain events" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+          <mxGeometry x="840" y="310" width="130" height="80" as="geometry"/>
+        </mxCell>
+        <mxCell id="redis" value="Redis&#xa;cache / catalogs" style="shape=cylinder3d;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=15;fillColor=#f8cecc;strokeColor=#b85450;" vertex="1" parent="1">
+          <mxGeometry x="840" y="430" width="130" height="80" as="geometry"/>
+        </mxCell>
+        <mxCell id="customerdb" value="MongoDB&#xa;customerdb" style="shape=cylinder3d;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=15;fillColor=#f8cecc;strokeColor=#b85450;" vertex="1" parent="1">
+          <mxGeometry x="620" y="180" width="130" height="90" as="geometry"/>
+        </mxCell>
+        <mxCell id="accountdb" value="MongoDB&#xa;accountdb" style="shape=cylinder3d;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=15;fillColor=#f8cecc;strokeColor=#b85450;" vertex="1" parent="1">
+          <mxGeometry x="620" y="310" width="130" height="90" as="geometry"/>
+        </mxCell>
+        <mxCell id="creditdb" value="MongoDB&#xa;creditdb" style="shape=cylinder3d;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=15;fillColor=#f8cecc;strokeColor=#b85450;" vertex="1" parent="1">
+          <mxGeometry x="620" y="440" width="130" height="90" as="geometry"/>
+        </mxCell>
+        <mxCell id="walletdb" value="MongoDB&#xa;walletdb" style="shape=cylinder3d;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=15;fillColor=#f8cecc;strokeColor=#b85450;" vertex="1" parent="1">
+          <mxGeometry x="620" y="560" width="130" height="90" as="geometry"/>
+        </mxCell>
+        <mxCell id="edge-client-customers" value="REST" style="endArrow=block;html=1;rounded=0;" edge="1" parent="1" source="client" target="customers">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="edge-client-gateway" value="REST entrypoint" style="endArrow=block;html=1;rounded=0;" edge="1" parent="1" source="client" target="gateway">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="edge-gateway-eureka" value="service discovery" style="endArrow=block;html=1;rounded=0;dashed=1;" edge="1" parent="1" source="gateway" target="eureka">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="edge-services-eureka" value="register APIs" style="endArrow=block;html=1;rounded=0;dashed=1;" edge="1" parent="1" source="customers" target="eureka">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="edge-client-accounts" value="REST" style="endArrow=block;html=1;rounded=0;" edge="1" parent="1" source="client" target="accounts">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="edge-client-credits" value="REST" style="endArrow=block;html=1;rounded=0;" edge="1" parent="1" source="client" target="credits">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="edge-config-repo" value="native files" style="endArrow=block;html=1;rounded=0;" edge="1" parent="1" source="config" target="repo">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="edge-customers-config" value="config client" style="endArrow=block;html=1;rounded=0;dashed=1;" edge="1" parent="1" source="customers" target="config">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="edge-accounts-config" value="config client" style="endArrow=block;html=1;rounded=0;dashed=1;" edge="1" parent="1" source="accounts" target="config">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="edge-credits-config" value="config client" style="endArrow=block;html=1;rounded=0;dashed=1;" edge="1" parent="1" source="credits" target="config">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="edge-customers-db" value="Spring Data" style="endArrow=block;html=1;rounded=0;" edge="1" parent="1" source="customers" target="customerdb">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="edge-accounts-db" value="Spring Data" style="endArrow=block;html=1;rounded=0;" edge="1" parent="1" source="accounts" target="accountdb">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="edge-credits-db" value="Spring Data" style="endArrow=block;html=1;rounded=0;" edge="1" parent="1" source="credits" target="creditdb">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="edge-wallet-db" value="Spring Data" style="endArrow=block;html=1;rounded=0;" edge="1" parent="1" source="wallets" target="walletdb">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="edge-credit-kafka" value="debt events" style="endArrow=block;html=1;rounded=0;" edge="1" parent="1" source="credits" target="kafka">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="edge-wallet-kafka" value="wallet events" style="endArrow=block;html=1;rounded=0;" edge="1" parent="1" source="wallets" target="kafka">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="edge-account-redis" value="debt cache" style="endArrow=block;html=1;rounded=0;" edge="1" parent="1" source="accounts" target="redis">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="edge-wallet-redis" value="catalog cache" style="endArrow=block;html=1;rounded=0;" edge="1" parent="1" source="wallets" target="redis">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram id="customer-sequence" name="Customer Service Sequence">
+    <mxGraphModel dx="1200" dy="800" grid="1" gridSize="10" page="1" pageScale="1" pageWidth="1169" pageHeight="827">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+        <mxCell id="cu1" value="Client" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;collapsible=0;recursiveResize=0;outlineConnect=0;" vertex="1" parent="1">
+          <mxGeometry x="90" y="60" width="100" height="450" as="geometry"/>
+        </mxCell>
+        <mxCell id="cu2" value="CustomerController" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;collapsible=0;recursiveResize=0;outlineConnect=0;" vertex="1" parent="1">
+          <mxGeometry x="300" y="60" width="150" height="450" as="geometry"/>
+        </mxCell>
+        <mxCell id="cu3" value="CustomerService" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;collapsible=0;recursiveResize=0;outlineConnect=0;" vertex="1" parent="1">
+          <mxGeometry x="560" y="60" width="130" height="450" as="geometry"/>
+        </mxCell>
+        <mxCell id="cu4" value="CustomerRepository" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;collapsible=0;recursiveResize=0;outlineConnect=0;" vertex="1" parent="1">
+          <mxGeometry x="800" y="60" width="160" height="450" as="geometry"/>
+        </mxCell>
+        <mxCell id="cu5" value="POST /api/v1/customers" style="endArrow=block;html=1;" edge="1" parent="1" source="cu1" target="cu2"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="cu6" value="create(request)" style="endArrow=block;html=1;" edge="1" parent="1" source="cu2" target="cu3"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="cu7" value="findByDocumentNumber" style="endArrow=block;html=1;" edge="1" parent="1" source="cu3" target="cu4"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="cu8" value="save(customer)" style="endArrow=block;html=1;" edge="1" parent="1" source="cu3" target="cu4"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="cu9" value="201 Created" style="endArrow=block;html=1;dashed=1;" edge="1" parent="1" source="cu2" target="cu1"><mxGeometry relative="1" as="geometry"/></mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram id="account-sequence" name="Account Service Sequence">
+    <mxGraphModel dx="1200" dy="800" grid="1" gridSize="10" page="1" pageScale="1" pageWidth="1169" pageHeight="827">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+        <mxCell id="ac1" value="Client" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;collapsible=0;recursiveResize=0;outlineConnect=0;" vertex="1" parent="1"><mxGeometry x="90" y="60" width="100" height="470" as="geometry"/></mxCell>
+        <mxCell id="ac2" value="BankAccountController" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;collapsible=0;recursiveResize=0;outlineConnect=0;" vertex="1" parent="1"><mxGeometry x="290" y="60" width="170" height="470" as="geometry"/></mxCell>
+        <mxCell id="ac3" value="BankAccountService" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;collapsible=0;recursiveResize=0;outlineConnect=0;" vertex="1" parent="1"><mxGeometry x="560" y="60" width="160" height="470" as="geometry"/></mxCell>
+        <mxCell id="ac4" value="AccountRepository" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;collapsible=0;recursiveResize=0;outlineConnect=0;" vertex="1" parent="1"><mxGeometry x="830" y="60" width="160" height="470" as="geometry"/></mxCell>
+        <mxCell id="ac5" value="POST /accounts/{id}/deposits" style="endArrow=block;html=1;" edge="1" parent="1" source="ac1" target="ac2"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="ac6" value="deposit(id, amount)" style="endArrow=block;html=1;" edge="1" parent="1" source="ac2" target="ac3"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="ac7" value="find account and validate rules" style="endArrow=block;html=1;" edge="1" parent="1" source="ac3" target="ac4"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="ac8" value="save account and movement" style="endArrow=block;html=1;" edge="1" parent="1" source="ac3" target="ac4"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="ac9" value="movement response" style="endArrow=block;html=1;dashed=1;" edge="1" parent="1" source="ac2" target="ac1"><mxGeometry relative="1" as="geometry"/></mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram id="credit-sequence" name="Credit Service Sequence">
+    <mxGraphModel dx="1200" dy="800" grid="1" gridSize="10" page="1" pageScale="1" pageWidth="1169" pageHeight="827">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+        <mxCell id="cr1" value="Client" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;collapsible=0;recursiveResize=0;outlineConnect=0;" vertex="1" parent="1"><mxGeometry x="90" y="60" width="100" height="470" as="geometry"/></mxCell>
+        <mxCell id="cr2" value="CreditProductController" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;collapsible=0;recursiveResize=0;outlineConnect=0;" vertex="1" parent="1"><mxGeometry x="290" y="60" width="180" height="470" as="geometry"/></mxCell>
+        <mxCell id="cr3" value="CreditProductService" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;collapsible=0;recursiveResize=0;outlineConnect=0;" vertex="1" parent="1"><mxGeometry x="570" y="60" width="170" height="470" as="geometry"/></mxCell>
+        <mxCell id="cr4" value="CreditRepository" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;collapsible=0;recursiveResize=0;outlineConnect=0;" vertex="1" parent="1"><mxGeometry x="840" y="60" width="150" height="470" as="geometry"/></mxCell>
+        <mxCell id="cr5" value="POST /credits/{id}/charges" style="endArrow=block;html=1;" edge="1" parent="1" source="cr1" target="cr2"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="cr6" value="charge(id, amount)" style="endArrow=block;html=1;" edge="1" parent="1" source="cr2" target="cr3"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="cr7" value="find card and validate limit" style="endArrow=block;html=1;" edge="1" parent="1" source="cr3" target="cr4"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="cr8" value="save product and movement" style="endArrow=block;html=1;" edge="1" parent="1" source="cr3" target="cr4"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="cr9" value="movement response" style="endArrow=block;html=1;dashed=1;" edge="1" parent="1" source="cr2" target="cr1"><mxGeometry relative="1" as="geometry"/></mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram id="wallet-sequence" name="Wallet Service Sequence">
+    <mxGraphModel dx="1200" dy="800" grid="1" gridSize="10" page="1" pageScale="1" pageWidth="1169" pageHeight="827">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+        <mxCell id="wa1" value="Client" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;collapsible=0;recursiveResize=0;outlineConnect=0;" vertex="1" parent="1">
+          <mxGeometry x="60" y="60" width="110" height="560" as="geometry"/>
+        </mxCell>
+        <mxCell id="wa2" value="WalletController" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;collapsible=0;recursiveResize=0;outlineConnect=0;" vertex="1" parent="1">
+          <mxGeometry x="230" y="60" width="150" height="560" as="geometry"/>
+        </mxCell>
+        <mxCell id="wa3" value="WalletService" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;collapsible=0;recursiveResize=0;outlineConnect=0;" vertex="1" parent="1">
+          <mxGeometry x="440" y="60" width="140" height="560" as="geometry"/>
+        </mxCell>
+        <mxCell id="wa4" value="WalletRepository" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;collapsible=0;recursiveResize=0;outlineConnect=0;" vertex="1" parent="1">
+          <mxGeometry x="640" y="60" width="150" height="560" as="geometry"/>
+        </mxCell>
+        <mxCell id="wa5" value="Redis Catalogs" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;collapsible=0;recursiveResize=0;outlineConnect=0;" vertex="1" parent="1">
+          <mxGeometry x="850" y="60" width="140" height="560" as="geometry"/>
+        </mxCell>
+        <mxCell id="wa6" value="Kafka" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;collapsible=0;recursiveResize=0;outlineConnect=0;" vertex="1" parent="1">
+          <mxGeometry x="1040" y="60" width="100" height="560" as="geometry"/>
+        </mxCell>
+        <mxCell id="wa7" value="POST /api/v1/wallets" style="endArrow=block;html=1;" edge="1" parent="1" source="wa1" target="wa2">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="wa8" value="create(request)" style="endArrow=block;html=1;" edge="1" parent="1" source="wa2" target="wa3">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="wa9" value="validate document type" style="endArrow=block;html=1;" edge="1" parent="1" source="wa3" target="wa5">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="wa10" value="existsByPhoneNumber" style="endArrow=block;html=1;" edge="1" parent="1" source="wa3" target="wa4">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="wa11" value="save wallet" style="endArrow=block;html=1;" edge="1" parent="1" source="wa3" target="wa4">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="wa12" value="201 Created" style="endArrow=block;html=1;dashed=1;" edge="1" parent="1" source="wa2" target="wa1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="wa13" value="PUT /wallets/{id}/debit-card" style="endArrow=block;html=1;" edge="1" parent="1" source="wa1" target="wa2">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="wa14" value="linkDebitCard(id, request)" style="endArrow=block;html=1;" edge="1" parent="1" source="wa2" target="wa3">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="wa15" value="check debit card cache" style="endArrow=block;html=1;" edge="1" parent="1" source="wa3" target="wa5">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="wa16" value="save linked wallet" style="endArrow=block;html=1;" edge="1" parent="1" source="wa3" target="wa4">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="wa17" value="publish wallet.debit-cards" style="endArrow=block;html=1;" edge="1" parent="1" source="wa3" target="wa6">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="wa18" value="POST /wallets/payments" style="endArrow=block;html=1;" edge="1" parent="1" source="wa1" target="wa2">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="wa19" value="sendPayment(request)" style="endArrow=block;html=1;" edge="1" parent="1" source="wa2" target="wa3">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="wa20" value="find source and target by phone" style="endArrow=block;html=1;" edge="1" parent="1" source="wa3" target="wa4">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="wa21" value="save balances when not linked" style="endArrow=block;html=1;" edge="1" parent="1" source="wa3" target="wa4">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="wa22" value="publish wallet.payments" style="endArrow=block;html=1;" edge="1" parent="1" source="wa3" target="wa6">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="wa23" value="payment response" style="endArrow=block;html=1;dashed=1;" edge="1" parent="1" source="wa2" target="wa1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

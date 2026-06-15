@@ -1,0 +1,171 @@
+openapi: 3.0.3
+info:
+  title: Wallet Service API
+  version: 1.0.0
+servers:
+  - url: http://localhost:8084
+tags:
+  - name: Wallet
+paths:
+  /api/v1/wallets:
+    post:
+      tags: [Wallet]
+      operationId: createWallet
+      summary: Create a Yanki mobile wallet
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WalletRequest'
+      responses:
+        '201':
+          description: Wallet created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Wallet'
+    get:
+      tags: [Wallet]
+      operationId: findAllWallets
+      summary: List wallets
+      responses:
+        '200':
+          description: Wallet list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Wallet'
+  /api/v1/wallets/{id}:
+    get:
+      tags: [Wallet]
+      operationId: findWalletById
+      summary: Find a wallet by id
+      parameters:
+        - $ref: '#/components/parameters/Id'
+      responses:
+        '200':
+          description: Wallet found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Wallet'
+  /api/v1/wallets/{id}/debit-card:
+    put:
+      tags: [Wallet]
+      operationId: linkDebitCard
+      summary: Link a wallet to a bank debit card
+      parameters:
+        - $ref: '#/components/parameters/Id'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DebitCardLinkRequest'
+      responses:
+        '200':
+          description: Wallet linked
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Wallet'
+  /api/v1/wallets/payments:
+    post:
+      tags: [Wallet]
+      operationId: sendWalletPayment
+      summary: Send a Yanki payment by phone number
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WalletPaymentRequest'
+      responses:
+        '200':
+          description: Wallet payment result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WalletPaymentResponse'
+components:
+  parameters:
+    Id:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+  schemas:
+    DocumentType:
+      type: string
+      enum: [DNI, CEX, PASSPORT]
+    WalletRequest:
+      type: object
+      required: [documentType, documentNumber, phoneNumber, imei, email]
+      properties:
+        documentType:
+          $ref: '#/components/schemas/DocumentType'
+        documentNumber:
+          type: string
+        phoneNumber:
+          type: string
+        imei:
+          type: string
+        email:
+          type: string
+          format: email
+    DebitCardLinkRequest:
+      type: object
+      required: [debitCardId]
+      properties:
+        debitCardId:
+          type: string
+    WalletPaymentRequest:
+      type: object
+      required: [sourcePhoneNumber, targetPhoneNumber, amount]
+      properties:
+        sourcePhoneNumber:
+          type: string
+        targetPhoneNumber:
+          type: string
+        amount:
+          type: number
+          minimum: 0.01
+        description:
+          type: string
+    Wallet:
+      allOf:
+        - $ref: '#/components/schemas/WalletRequest'
+        - type: object
+          properties:
+            id:
+              type: string
+            debitCardId:
+              type: string
+            balance:
+              type: number
+            createdAt:
+              type: string
+              format: date-time
+            updatedAt:
+              type: string
+              format: date-time
+    WalletPaymentResponse:
+      type: object
+      properties:
+        sourceWalletId:
+          type: string
+        targetWalletId:
+          type: string
+        amount:
+          type: number
+        sourceBalance:
+          type: number
+        targetBalance:
+          type: number
+        createdAt:
+          type: string
+          format: date-time

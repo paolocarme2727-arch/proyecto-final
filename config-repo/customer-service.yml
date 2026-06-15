@@ -1,0 +1,26 @@
+server:
+  port: 8081
+
+spring:
+  data:
+    mongodb:
+      uri: mongodb://localhost:27017/customerdb
+
+logging:
+  level:
+    com.example.bank.customers: DEBUG
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+
+resilience4j:
+  timelimiter:
+    configs:
+      default:
+        timeout-duration: 2s
+
+security:
+  jwt:
+    secret: ${JWT_SECRET}

@@ -1,0 +1,453 @@
+openapi: 3.0.3
+info:
+  title: Account Service API
+  version: 1.0.0
+servers:
+  - url: http://localhost:8082
+tags:
+  - name: BankAccount
+paths:
+  /api/v1/accounts:
+    post:
+      tags: [BankAccount]
+      operationId: createAccount
+      summary: Create a bank account
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AccountRequest'
+      responses:
+        '201':
+          description: Account created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BankAccount'
+    get:
+      tags: [BankAccount]
+      operationId: findAllAccounts
+      summary: List bank accounts
+      responses:
+        '200':
+          description: Account list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/BankAccount'
+  /api/v1/accounts/{id}:
+    get:
+      tags: [BankAccount]
+      operationId: findAccountById
+      summary: Find a bank account by id
+      parameters:
+        - $ref: '#/components/parameters/Id'
+      responses:
+        '200':
+          description: Account found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BankAccount'
+    put:
+      tags: [BankAccount]
+      operationId: updateAccount
+      summary: Update a bank account
+      parameters:
+        - $ref: '#/components/parameters/Id'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AccountRequest'
+      responses:
+        '200':
+          description: Account updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BankAccount'
+    delete:
+      tags: [BankAccount]
+      operationId: deleteAccount
+      summary: Delete a bank account
+      parameters:
+        - $ref: '#/components/parameters/Id'
+      responses:
+        '204':
+          description: Account deleted
+  /api/v1/accounts/{id}/deposits:
+    post:
+      tags: [BankAccount]
+      operationId: depositAccount
+      summary: Deposit money
+      parameters:
+        - $ref: '#/components/parameters/Id'
+      requestBody:
+        $ref: '#/components/requestBodies/Money'
+      responses:
+        '200':
+          description: Deposit movement
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccountMovement'
+  /api/v1/accounts/{id}/withdrawals:
+    post:
+      tags: [BankAccount]
+      operationId: withdrawAccount
+      summary: Withdraw money
+      parameters:
+        - $ref: '#/components/parameters/Id'
+      requestBody:
+        $ref: '#/components/requestBodies/Money'
+      responses:
+        '200':
+          description: Withdrawal movement
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccountMovement'
+  /api/v1/accounts/{id}/balance:
+    get:
+      tags: [BankAccount]
+      operationId: getAccountBalance
+      summary: Get available balance
+      parameters:
+        - $ref: '#/components/parameters/Id'
+      responses:
+        '200':
+          description: Balance
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BalanceResponse'
+  /api/v1/accounts/{id}/movements:
+    get:
+      tags: [BankAccount]
+      operationId: findAccountMovements
+      summary: List account movements
+      parameters:
+        - $ref: '#/components/parameters/Id'
+      responses:
+        '200':
+          description: Movement list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AccountMovement'
+  /api/v1/accounts/transfers:
+    post:
+      tags: [BankAccount]
+      operationId: transferBetweenAccounts
+      summary: Transfer money between bank accounts
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TransferRequest'
+      responses:
+        '200':
+          description: Transfer result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TransferResponse'
+  /api/v1/accounts/reports/products/{type}:
+    get:
+      tags: [BankAccount]
+      operationId: getAccountProductReport
+      summary: Get a general account product report in a time range
+      parameters:
+        - name: type
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/AccountType'
+        - name: from
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date-time
+        - name: to
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date-time
+      responses:
+        '200':
+          description: Account product report
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccountProductReportResponse'
+  /api/v1/accounts/{id}/debit-card/movements/recent:
+    get:
+      tags: [BankAccount]
+      operationId: findRecentDebitCardMovements
+      summary: List the last 10 debit card movements
+      parameters:
+        - $ref: '#/components/parameters/Id'
+      responses:
+        '200':
+          description: Recent debit card movements
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AccountMovement'
+  /api/v1/accounts/debit-cards:
+    post:
+      tags: [BankAccount]
+      operationId: createDebitCard
+      summary: Create a debit card associated with an account
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DebitCardRequest'
+      responses:
+        '201':
+          description: Debit card created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DebitCard'
+  /api/v1/accounts/debit-cards/{id}/payments:
+    post:
+      tags: [BankAccount]
+      operationId: payWithDebitCard
+      summary: Pay with a debit card
+      parameters:
+        - $ref: '#/components/parameters/Id'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DebitCardPaymentRequest'
+      responses:
+        '200':
+          description: Debit card payment movement
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccountMovement'
+components:
+  parameters:
+    Id:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+  requestBodies:
+    Money:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/MoneyRequest'
+  schemas:
+    AccountType:
+      type: string
+      enum: [SAVINGS, CHECKING, FIXED_TERM]
+    CustomerType:
+      type: string
+      enum: [PERSONAL, BUSINESS]
+    CustomerProfile:
+      type: string
+      enum: [REGULAR, VIP, PYME]
+    MovementType:
+      type: string
+      enum: [DEPOSIT, WITHDRAWAL, TRANSFER_IN, TRANSFER_OUT, DEBIT_CARD_PAYMENT, WALLET_PAYMENT_IN, WALLET_PAYMENT_OUT]
+    AccountRequest:
+      type: object
+      required: [customerId, customerType, type]
+      properties:
+        customerId:
+          type: string
+        customerType:
+          $ref: '#/components/schemas/CustomerType'
+        customerProfile:
+          $ref: '#/components/schemas/CustomerProfile'
+        type:
+          $ref: '#/components/schemas/AccountType'
+        initialBalance:
+          type: number
+        minimumOpeningAmount:
+          type: number
+        movementDay:
+          type: integer
+        holders:
+          type: array
+          items:
+            type: string
+        authorizedSigners:
+          type: array
+          items:
+            type: string
+    MoneyRequest:
+      type: object
+      required: [amount]
+      properties:
+        amount:
+          type: number
+          minimum: 0.01
+    TransferRequest:
+      type: object
+      required: [sourceAccountId, targetAccountId, amount]
+      properties:
+        sourceAccountId:
+          type: string
+        targetAccountId:
+          type: string
+        amount:
+          type: number
+          minimum: 0.01
+        description:
+          type: string
+    DebitCardRequest:
+      type: object
+      required: [customerId, accountId, cardNumber]
+      properties:
+        customerId:
+          type: string
+        accountId:
+          type: string
+        cardNumber:
+          type: string
+    DebitCardPaymentRequest:
+      type: object
+      required: [amount]
+      properties:
+        amount:
+          type: number
+          minimum: 0.01
+        merchant:
+          type: string
+    TransferResponse:
+      type: object
+      properties:
+        sourceAccountId:
+          type: string
+        targetAccountId:
+          type: string
+        amount:
+          type: number
+        sourceMovementId:
+          type: string
+        targetMovementId:
+          type: string
+        sourceBalance:
+          type: number
+        targetBalance:
+          type: number
+        createdAt:
+          type: string
+          format: date-time
+    BankAccount:
+      allOf:
+        - $ref: '#/components/schemas/AccountRequest'
+        - type: object
+          properties:
+            id:
+              type: string
+            balance:
+              type: number
+            maintenanceFee:
+              type: number
+            minimumOpeningAmount:
+              type: number
+            minimumDailyAverageAmount:
+              type: number
+            monthlyMovementLimit:
+              type: integer
+            monthlyMovementCount:
+              type: integer
+            freeTransactionLimit:
+              type: integer
+            transactionFee:
+              type: number
+            chargedFees:
+              type: number
+            createdAt:
+              type: string
+              format: date-time
+            updatedAt:
+              type: string
+              format: date-time
+    AccountMovement:
+      type: object
+      properties:
+        id:
+          type: string
+        accountId:
+          type: string
+        type:
+          $ref: '#/components/schemas/MovementType'
+        amount:
+          type: number
+        fee:
+          type: number
+        resultingBalance:
+          type: number
+        createdAt:
+          type: string
+          format: date-time
+    BalanceResponse:
+      type: object
+      properties:
+        productId:
+          type: string
+        availableBalance:
+          type: number
+    AccountProductReportResponse:
+      type: object
+      properties:
+        productType:
+          $ref: '#/components/schemas/AccountType'
+        from:
+          type: string
+          format: date-time
+        to:
+          type: string
+          format: date-time
+        productCount:
+          type: integer
+        movementCount:
+          type: integer
+        totalAmount:
+          type: number
+        totalFees:
+          type: number
+        movements:
+          type: array
+          items:
+            $ref: '#/components/schemas/AccountMovement'
+    DebitCard:
+      allOf:
+        - $ref: '#/components/schemas/DebitCardRequest'
+        - type: object
+          properties:
+            id:
+              type: string
+            active:
+              type: boolean
+            createdAt:
+              type: string
+              format: date-time
+            updatedAt:
+              type: string
+              format: date-time

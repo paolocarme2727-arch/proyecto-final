@@ -1,0 +1,330 @@
+openapi: 3.0.3
+info:
+  title: Credit Service API
+  version: 1.0.0
+servers:
+  - url: http://localhost:8083
+tags:
+  - name: CreditProduct
+paths:
+  /api/v1/credits:
+    post:
+      tags: [CreditProduct]
+      operationId: createCreditProduct
+      summary: Create a credit product
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreditProductRequest'
+      responses:
+        '201':
+          description: Product created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreditProduct'
+    get:
+      tags: [CreditProduct]
+      operationId: findAllCreditProducts
+      summary: List credit products
+      responses:
+        '200':
+          description: Product list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CreditProduct'
+  /api/v1/credits/{id}:
+    get:
+      tags: [CreditProduct]
+      operationId: findCreditProductById
+      summary: Find a credit product by id
+      parameters:
+        - $ref: '#/components/parameters/Id'
+      responses:
+        '200':
+          description: Product found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreditProduct'
+    put:
+      tags: [CreditProduct]
+      operationId: updateCreditProduct
+      summary: Update a credit product
+      parameters:
+        - $ref: '#/components/parameters/Id'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreditProductRequest'
+      responses:
+        '200':
+          description: Product updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreditProduct'
+    delete:
+      tags: [CreditProduct]
+      operationId: deleteCreditProduct
+      summary: Delete a credit product
+      parameters:
+        - $ref: '#/components/parameters/Id'
+      responses:
+        '204':
+          description: Product deleted
+  /api/v1/credits/{id}/payments:
+    post:
+      tags: [CreditProduct]
+      operationId: payCreditProduct
+      summary: Pay a credit product
+      parameters:
+        - $ref: '#/components/parameters/Id'
+      requestBody:
+        $ref: '#/components/requestBodies/Money'
+      responses:
+        '200':
+          description: Payment movement
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreditMovement'
+  /api/v1/credits/{id}/charges:
+    post:
+      tags: [CreditProduct]
+      operationId: chargeCreditCard
+      summary: Charge a credit card
+      parameters:
+        - $ref: '#/components/parameters/Id'
+      requestBody:
+        $ref: '#/components/requestBodies/Money'
+      responses:
+        '200':
+          description: Charge movement
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreditMovement'
+  /api/v1/credits/{id}/balance:
+    get:
+      tags: [CreditProduct]
+      operationId: getCreditBalance
+      summary: Get credit balance
+      parameters:
+        - $ref: '#/components/parameters/Id'
+      responses:
+        '200':
+          description: Balance
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreditBalanceResponse'
+  /api/v1/credits/{id}/movements:
+    get:
+      tags: [CreditProduct]
+      operationId: findCreditMovements
+      summary: List credit movements
+      parameters:
+        - $ref: '#/components/parameters/Id'
+      responses:
+        '200':
+          description: Movement list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CreditMovement'
+  /api/v1/credits/customers/{customerId}/credit-card-exists:
+    get:
+      tags: [CreditProduct]
+      operationId: customerHasCreditCard
+      summary: Check whether a customer has a credit card
+      parameters:
+        - name: customerId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Credit card existence result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreditCardExistenceResponse'
+  /api/v1/credits/reports/products/{type}:
+    get:
+      tags: [CreditProduct]
+      operationId: getCreditProductReport
+      summary: Get a general credit product report in a time range
+      parameters:
+        - name: type
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/CreditProductType'
+        - name: from
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date-time
+        - name: to
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date-time
+      responses:
+        '200':
+          description: Credit product report
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreditProductReportResponse'
+  /api/v1/credits/{id}/credit-card/movements/recent:
+    get:
+      tags: [CreditProduct]
+      operationId: findRecentCreditCardMovements
+      summary: List the last 10 credit card movements
+      parameters:
+        - $ref: '#/components/parameters/Id'
+      responses:
+        '200':
+          description: Recent credit card movements
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CreditMovement'
+components:
+  parameters:
+    Id:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+  requestBodies:
+    Money:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/MoneyRequest'
+  schemas:
+    CustomerType:
+      type: string
+      enum: [PERSONAL, BUSINESS]
+    CreditProductType:
+      type: string
+      enum: [PERSONAL_LOAN, BUSINESS_LOAN, PERSONAL_CREDIT_CARD, BUSINESS_CREDIT_CARD]
+    CreditMovementType:
+      type: string
+      enum: [DISBURSEMENT, PAYMENT, CHARGE]
+    CreditProductRequest:
+      type: object
+      required: [customerId, customerType, type, creditLimit]
+      properties:
+        customerId:
+          type: string
+        customerType:
+          $ref: '#/components/schemas/CustomerType'
+        type:
+          $ref: '#/components/schemas/CreditProductType'
+        creditLimit:
+          type: number
+        initialDebt:
+          type: number
+        overdueDebt:
+          type: boolean
+    MoneyRequest:
+      type: object
+      required: [amount]
+      properties:
+        amount:
+          type: number
+          minimum: 0.01
+    CreditProduct:
+      allOf:
+        - $ref: '#/components/schemas/CreditProductRequest'
+        - type: object
+          properties:
+            id:
+              type: string
+            usedAmount:
+              type: number
+            outstandingBalance:
+              type: number
+            overdueDebt:
+              type: boolean
+            createdAt:
+              type: string
+              format: date-time
+            updatedAt:
+              type: string
+              format: date-time
+    CreditMovement:
+      type: object
+      properties:
+        id:
+          type: string
+        creditProductId:
+          type: string
+        type:
+          $ref: '#/components/schemas/CreditMovementType'
+        amount:
+          type: number
+        resultingDebt:
+          type: number
+        availableCredit:
+          type: number
+        createdAt:
+          type: string
+          format: date-time
+    CreditBalanceResponse:
+      type: object
+      properties:
+        productId:
+          type: string
+        outstandingBalance:
+          type: number
+        availableCredit:
+          type: number
+    CreditCardExistenceResponse:
+      type: object
+      properties:
+        customerId:
+          type: string
+        hasCreditCard:
+          type: boolean
+    CreditProductReportResponse:
+      type: object
+      properties:
+        productType:
+          $ref: '#/components/schemas/CreditProductType'
+        from:
+          type: string
+          format: date-time
+        to:
+          type: string
+          format: date-time
+        productCount:
+          type: integer
+        movementCount:
+          type: integer
+        totalAmount:
+          type: number
+        movements:
+          type: array
+          items:
+            $ref: '#/components/schemas/CreditMovement'
