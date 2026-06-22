@@ -2,6 +2,8 @@ package com.example.bank.accounts.domain;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+
+import com.example.bank.accounts.util.enums.MovementTypeEnum;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -26,7 +28,7 @@ public class AccountMovement {
     private String id;
     @Indexed
     private String accountId;
-    private MovementType type;
+    private MovementTypeEnum type;
     private BigDecimal amount;
     private BigDecimal fee;
     private BigDecimal resultingBalance;

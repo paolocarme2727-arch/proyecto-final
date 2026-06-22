@@ -15,17 +15,14 @@ spring:
   kafka:
     bootstrap-servers: localhost:9092
     producer:
+      retries: 3
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
-      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      value-serializer: org.apache.kafka.common.serialization.ByteArraySerializer
     consumer:
       group-id: account-service
       auto-offset-reset: earliest
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
-      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
-      properties:
-        spring.json.trusted.packages: "*"
-        spring.json.use.type.headers: false
-        spring.json.value.default.type: com.example.bank.accounts.events.CreditDebtStatusEvent
+      value-deserializer: org.apache.kafka.common.serialization.ByteArrayDeserializer
 
 banking:
   accounts:
@@ -35,6 +32,14 @@ banking:
     free-transaction-limit: 20
     transaction-fee: 3.50
     vip-monthly-minimum-average-amount: 500.00
+    outbox:
+      fixed-delay-ms: 5000
+      retry-delay-seconds: 10
+      max-retries: 3
+
+  kafka:
+    retry:
+      max-attempts: 3
 
 management:
   endpoints:

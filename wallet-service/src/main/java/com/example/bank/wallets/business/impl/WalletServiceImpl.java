@@ -1,22 +1,27 @@
 package com.example.bank.wallets.business.impl;
 
 import com.example.bank.wallets.business.WalletService;
-import com.example.bank.wallets.domain.DocumentType;
+import com.example.bank.wallets.business.domain.WalletDomainService;
+import com.example.bank.wallets.business.impl.strategy.WalletCreationValidationStrategy;
+import com.example.bank.wallets.business.impl.strategy.WalletPaymentValidationStrategy;
+import com.example.bank.wallets.business.util.WalletBusinessUtils;
 import com.example.bank.wallets.domain.Wallet;
+import com.example.bank.wallets.events.DebitCardCatalog;
+import com.example.bank.wallets.events.WalletEventPublisher;
 import com.example.bank.wallets.expose.model.DebitCardLinkRequest;
 import com.example.bank.wallets.expose.model.WalletPaymentRequest;
 import com.example.bank.wallets.expose.model.WalletPaymentResponse;
 import com.example.bank.wallets.expose.model.WalletRequest;
 import com.example.bank.wallets.repository.WalletRepository;
-import com.example.bank.wallets.proxy.DebitCardCatalog;
-import com.example.bank.wallets.service.DocumentTypeCatalog;
-import com.example.bank.wallets.proxy.WalletEventPublisher;
+import com.example.bank.wallets.util.CommonUtils;
+import io.reactivex.rxjava3.core.Completable;
 import io.reactivex.rxjava3.core.Flowable;
 import io.reactivex.rxjava3.core.Single;
 import io.reactivex.rxjava3.schedulers.Schedulers;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -32,25 +37,21 @@ import org.springframework.web.server.ResponseStatusException;
 public class WalletServiceImpl implements WalletService {
 
     private final WalletRepository walletRepository;
-    private final DocumentTypeCatalog documentTypeCatalog;
     private final DebitCardCatalog debitCardCatalog;
     private final WalletEventPublisher eventPublisher;
+    private final WalletDomainService walletDomainService;
+    private final List<WalletCreationValidationStrategy> creationValidationStrategies;
+    private final List<WalletPaymentValidationStrategy> paymentValidationStrategies;
 
     /**
      * Creates a wallet for a person that may not be a bank customer.
      */
     @Override
     public Single<Wallet> create(WalletRequest request) {
-        DocumentType documentType = DocumentType.valueOf(request.getDocumentType().getValue());
-        return documentTypeCatalog.isSupported(documentType)
-                .flatMap(supported -> supported
-                        ? Single.fromCallable(() -> walletRepository.existsByPhoneNumber(request.getPhoneNumber()))
-                        : Single.error(new ResponseStatusException(HttpStatus.BAD_REQUEST, "Unsupported document type")))
-                .flatMap(exists -> exists
-                        ? Single.error(new ResponseStatusException(HttpStatus.CONFLICT, "Phone number already has a wallet"))
-                        : Single.fromCallable(() -> walletRepository.save(toNewWallet(request))))
+        return validateCreation(request)
+                .andThen(Single.fromCallable(() -> walletRepository.save(toNewWallet(request))))
                 .subscribeOn(Schedulers.io())
-                .doOnSuccess(wallet -> log.info("Created wallet {}", wallet.getId()));
+                .doOnSuccess(wallet -> log.info("Monedero creado {}", wallet.getId()));
     }
 
     /**
@@ -68,7 +69,7 @@ public class WalletServiceImpl implements WalletService {
      */
     @Override
     public Single<Wallet> findById(String id) {
-        return findExisting(id);
+        return walletDomainService.findExistingWalletReactive(id);
     }
 
     /**
@@ -78,13 +79,11 @@ public class WalletServiceImpl implements WalletService {
     public Single<Wallet> linkDebitCard(String id, DebitCardLinkRequest request) {
         return debitCardCatalog.exists(request.getDebitCardId())
                 .flatMap(available -> available
-                        ? findExisting(id)
-                        : Single.error(new ResponseStatusException(HttpStatus.BAD_REQUEST, "Debit card is not available for linking")))
-                .flatMap(wallet -> {
-                    wallet.setDebitCardId(request.getDebitCardId());
-                    wallet.setUpdatedAt(LocalDateTime.now());
-                    return Single.fromCallable(() -> walletRepository.save(wallet));
-                })
+                        ? walletDomainService.findExistingWalletReactive(id)
+                        : Single.error(new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                                "La tarjeta de débito no está disponible para vinculación")))
+                .flatMap(wallet -> Single.fromCallable(() -> walletRepository.save(
+                        applyDebitCardLink(wallet, request))))
                 .subscribeOn(Schedulers.io())
                 .doOnSuccess(wallet -> eventPublisher.publishDebitCardLinked(wallet.getId(), wallet.getDebitCardId()));
     }
@@ -94,9 +93,11 @@ public class WalletServiceImpl implements WalletService {
      */
     @Override
     public Single<WalletPaymentResponse> sendPayment(WalletPaymentRequest request) {
-        Single<Wallet> source = findByPhoneNumber(request.getSourcePhoneNumber());
-        Single<Wallet> target = findByPhoneNumber(request.getTargetPhoneNumber());
-        return Single.zip(source, target, (sourceWallet, targetWallet) -> new WalletPair(sourceWallet, targetWallet))
+        Single<Wallet> source = walletDomainService.findExistingWalletByPhoneNumberReactive(
+                request.getSourcePhoneNumber());
+        Single<Wallet> target = walletDomainService.findExistingWalletByPhoneNumberReactive(
+                request.getTargetPhoneNumber());
+        return Single.zip(source, target, WalletPair::new)
                 .flatMap(pair -> executePayment(pair.source(), pair.target(), request)
                         .flatMap(response -> eventPublisher.publishWalletPayment(
                                 response.getSourceWalletId(),
@@ -106,55 +107,28 @@ public class WalletServiceImpl implements WalletService {
                                 response.getAmount()).andThen(Single.just(response))));
     }
 
-    private Single<WalletPaymentResponse> executePayment(Wallet source, Wallet target, WalletPaymentRequest request) {
-        if (source.getId().equals(target.getId())) {
-            return Single.error(new ResponseStatusException(HttpStatus.BAD_REQUEST, "Source and target wallets must be different"));
-        }
-        boolean sourceLinked = hasText(source.getDebitCardId());
-        boolean targetLinked = hasText(target.getDebitCardId());
-        if (!sourceLinked && source.getBalance().compareTo(request.getAmount()) < 0) {
-            return Single.error(new ResponseStatusException(HttpStatus.BAD_REQUEST, "Insufficient wallet balance"));
-        }
-        if (!sourceLinked) {
-            source.setBalance(source.getBalance().subtract(request.getAmount()));
-        }
-        if (!targetLinked) {
-            target.setBalance(target.getBalance().add(request.getAmount()));
-        }
-        source.setUpdatedAt(LocalDateTime.now());
-        target.setUpdatedAt(LocalDateTime.now());
+    private Completable validateCreation(WalletRequest request) {
+        return Completable.merge(creationValidationStrategies.stream()
+                .map(strategy -> strategy.validate(request))
+                .toList());
+    }
+
+    private Single<WalletPaymentResponse> executePayment(
+            Wallet source,
+            Wallet target,
+            WalletPaymentRequest request) {
+        paymentValidationStrategies.forEach(strategy -> strategy.validate(source, target, request));
+        applyWalletPayment(source, target, request);
         return Single.zip(
                 Single.fromCallable(() -> walletRepository.save(source)),
                 Single.fromCallable(() -> walletRepository.save(target)),
-                (savedSource, savedTarget) -> new WalletPaymentResponse()
-                        .sourceWalletId(savedSource.getId())
-                        .targetWalletId(savedTarget.getId())
-                        .amount(request.getAmount())
-                        .sourceBalance(savedSource.getBalance())
-                        .targetBalance(savedTarget.getBalance())
-                        .createdAt(LocalDateTime.now().atOffset(ZoneOffset.UTC)));
-    }
-
-    private boolean hasText(String value) {
-        return value != null && !value.isBlank();
-    }
-
-    private Single<Wallet> findExisting(String id) {
-        return Single.fromCallable(() -> walletRepository.findById(id)
-                        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Wallet not found")))
-                .subscribeOn(Schedulers.io());
-    }
-
-    private Single<Wallet> findByPhoneNumber(String phoneNumber) {
-        return Single.fromCallable(() -> walletRepository.findByPhoneNumber(phoneNumber)
-                        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Wallet not found")))
-                .subscribeOn(Schedulers.io());
+                (savedSource, savedTarget) -> toWalletPaymentResponse(savedSource, savedTarget, request));
     }
 
     private Wallet toNewWallet(WalletRequest request) {
         LocalDateTime now = LocalDateTime.now();
         return Wallet.builder()
-                .documentType(DocumentType.valueOf(request.getDocumentType().getValue()))
+                .documentType(WalletBusinessUtils.toDomainDocumentType(request))
                 .documentNumber(request.getDocumentNumber())
                 .phoneNumber(request.getPhoneNumber())
                 .imei(request.getImei())
@@ -165,8 +139,36 @@ public class WalletServiceImpl implements WalletService {
                 .build();
     }
 
+    private Wallet applyDebitCardLink(Wallet wallet, DebitCardLinkRequest request) {
+        wallet.setDebitCardId(request.getDebitCardId());
+        wallet.setUpdatedAt(LocalDateTime.now());
+        return wallet;
+    }
+
+    private void applyWalletPayment(Wallet source, Wallet target, WalletPaymentRequest request) {
+        if (!CommonUtils.hasText(source.getDebitCardId())) {
+            source.setBalance(source.getBalance().subtract(request.getAmount()));
+        }
+        if (!CommonUtils.hasText(target.getDebitCardId())) {
+            target.setBalance(target.getBalance().add(request.getAmount()));
+        }
+        source.setUpdatedAt(LocalDateTime.now());
+        target.setUpdatedAt(LocalDateTime.now());
+    }
+
+    private WalletPaymentResponse toWalletPaymentResponse(
+            Wallet source,
+            Wallet target,
+            WalletPaymentRequest request) {
+        return new WalletPaymentResponse()
+                .sourceWalletId(source.getId())
+                .targetWalletId(target.getId())
+                .amount(request.getAmount())
+                .sourceBalance(source.getBalance())
+                .targetBalance(target.getBalance())
+                .createdAt(LocalDateTime.now().atOffset(ZoneOffset.UTC));
+    }
+
     private record WalletPair(Wallet source, Wallet target) {
     }
 }
-
-

@@ -1,0 +1,9 @@
+{
+  "type": "record",
+  "name": "CreditDebtStatusEvent",
+  "namespace": "com.example.bank.contracts",
+  "fields": [
+    { "name": "customerId", "type": "string" },
+    { "name": "hasOverdueDebt", "type": "boolean" }
+  ]
+}

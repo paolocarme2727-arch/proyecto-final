@@ -1,0 +1,117 @@
+openapi: 3.0.3
+info:
+  title: API de movimientos de crédito
+  version: 1.0.0
+servers:
+  - url: http://localhost:8083
+tags:
+  - name: CreditMovement
+paths:
+  /api/v1/credits/{id}/payments:
+    post:
+      tags: [CreditMovement]
+      operationId: payCreditProduct
+      summary: Pagar un producto de crédito
+      parameters:
+        - $ref: '#/components/parameters/Id'
+      requestBody:
+        $ref: '#/components/requestBodies/Money'
+      responses:
+        '200':
+          description: Movimiento de pago
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreditMovement'
+  /api/v1/credits/{id}/charges:
+    post:
+      tags: [CreditMovement]
+      operationId: chargeCreditCard
+      summary: Registrar consumo en tarjeta de crédito
+      parameters:
+        - $ref: '#/components/parameters/Id'
+      requestBody:
+        $ref: '#/components/requestBodies/Money'
+      responses:
+        '200':
+          description: Movimiento de consumo
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreditMovement'
+  /api/v1/credits/{id}/movements:
+    get:
+      tags: [CreditMovement]
+      operationId: findCreditMovements
+      summary: Listar movimientos de crédito
+      parameters:
+        - $ref: '#/components/parameters/Id'
+      responses:
+        '200':
+          description: Lista de movimientos
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CreditMovement'
+  /api/v1/credits/{id}/credit-card/movements/recent:
+    get:
+      tags: [CreditMovement]
+      operationId: findRecentCreditCardMovements
+      summary: Listar los últimos 10 movimientos de tarjeta de crédito
+      parameters:
+        - $ref: '#/components/parameters/Id'
+      responses:
+        '200':
+          description: Movimientos recientes de tarjeta de crédito
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CreditMovement'
+components:
+  parameters:
+    Id:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+  requestBodies:
+    Money:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/MoneyRequest'
+  schemas:
+    CreditMovementType:
+      type: string
+      enum: [DISBURSEMENT, PAYMENT, CHARGE]
+    MoneyRequest:
+      type: object
+      required: [amount]
+      properties:
+        amount:
+          type: number
+          minimum: 0.01
+    CreditMovement:
+      type: object
+      properties:
+        id:
+          type: string
+        creditProductId:
+          type: string
+        type:
+          $ref: '#/components/schemas/CreditMovementType'
+        amount:
+          type: number
+        resultingDebt:
+          type: number
+        availableCredit:
+          type: number
+        createdAt:
+          type: string
+          format: date-time

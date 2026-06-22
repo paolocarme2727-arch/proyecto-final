@@ -1,0 +1,13 @@
+{
+  "type": "record",
+  "name": "WalletPaymentEvent",
+  "namespace": "com.example.bank.contracts",
+  "fields": [
+    { "name": "sourceWalletId", "type": "string" },
+    { "name": "targetWalletId", "type": "string" },
+    { "name": "sourceDebitCardId", "type": ["null", "string"], "default": null },
+    { "name": "targetDebitCardId", "type": ["null", "string"], "default": null },
+    { "name": "amount", "type": "string" },
+    { "name": "createdAt", "type": "string" }
+  ]
+}

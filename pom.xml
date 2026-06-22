@@ -29,6 +29,7 @@
         <rxjava.version>3.1.9</rxjava.version>
         <springdoc.version>2.6.0</springdoc.version>
         <openapi-generator.version>7.8.0</openapi-generator.version>
+        <avro.version>1.11.3</avro.version>
         <jacoco.version>0.8.12</jacoco.version>
         <checkstyle.version>10.17.0</checkstyle.version>
         <maven-checkstyle-plugin.version>3.4.0</maven-checkstyle-plugin.version>
@@ -61,6 +62,11 @@
                 <groupId>org.springdoc</groupId>
                 <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
                 <version>${springdoc.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.avro</groupId>
+                <artifactId>avro</artifactId>
+                <version>${avro.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

@@ -1,0 +1,180 @@
+openapi: 3.0.3
+info:
+  title: API de productos de crédito
+  version: 1.0.0
+servers:
+  - url: http://localhost:8083
+tags:
+  - name: CreditProduct
+paths:
+  /api/v1/credits:
+    post:
+      tags: [CreditProduct]
+      operationId: createCreditProduct
+      summary: Crear un producto de crédito
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreditProductRequest'
+      responses:
+        '201':
+          description: Producto creado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreditProduct'
+    get:
+      tags: [CreditProduct]
+      operationId: findAllCreditProducts
+      summary: Listar productos de crédito
+      responses:
+        '200':
+          description: Lista de productos
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CreditProduct'
+  /api/v1/credits/{id}:
+    get:
+      tags: [CreditProduct]
+      operationId: findCreditProductById
+      summary: Buscar un producto de crédito por id
+      parameters:
+        - $ref: '#/components/parameters/Id'
+      responses:
+        '200':
+          description: Producto encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreditProduct'
+    put:
+      tags: [CreditProduct]
+      operationId: updateCreditProduct
+      summary: Actualizar un producto de crédito
+      parameters:
+        - $ref: '#/components/parameters/Id'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreditProductRequest'
+      responses:
+        '200':
+          description: Producto actualizado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreditProduct'
+    delete:
+      tags: [CreditProduct]
+      operationId: deleteCreditProduct
+      summary: Eliminar un producto de crédito
+      parameters:
+        - $ref: '#/components/parameters/Id'
+      responses:
+        '204':
+          description: Producto eliminado
+  /api/v1/credits/{id}/balance:
+    get:
+      tags: [CreditProduct]
+      operationId: getCreditBalance
+      summary: Consultar saldo de crédito
+      parameters:
+        - $ref: '#/components/parameters/Id'
+      responses:
+        '200':
+          description: Saldo
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreditBalanceResponse'
+  /api/v1/credits/customers/{customerId}/credit-card-exists:
+    get:
+      tags: [CreditProduct]
+      operationId: customerHasCreditCard
+      summary: Verificar si un cliente tiene tarjeta de crédito
+      parameters:
+        - name: customerId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Resultado de existencia de tarjeta de crédito
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreditCardExistenceResponse'
+components:
+  parameters:
+    Id:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+  schemas:
+    CustomerType:
+      type: string
+      enum: [PERSONAL, BUSINESS]
+    CreditProductType:
+      type: string
+      enum: [PERSONAL_LOAN, BUSINESS_LOAN, PERSONAL_CREDIT_CARD, BUSINESS_CREDIT_CARD]
+    CreditProductRequest:
+      type: object
+      required: [customerId, customerType, type, creditLimit]
+      properties:
+        customerId:
+          type: string
+        customerType:
+          $ref: '#/components/schemas/CustomerType'
+        type:
+          $ref: '#/components/schemas/CreditProductType'
+        creditLimit:
+          type: number
+        initialDebt:
+          type: number
+        overdueDebt:
+          type: boolean
+    CreditProduct:
+      allOf:
+        - $ref: '#/components/schemas/CreditProductRequest'
+        - type: object
+          properties:
+            id:
+              type: string
+            usedAmount:
+              type: number
+            outstandingBalance:
+              type: number
+            overdueDebt:
+              type: boolean
+            createdAt:
+              type: string
+              format: date-time
+            updatedAt:
+              type: string
+              format: date-time
+    CreditBalanceResponse:
+      type: object
+      properties:
+        productId:
+          type: string
+        outstandingBalance:
+          type: number
+        availableCredit:
+          type: number
+    CreditCardExistenceResponse:
+      type: object
+      properties:
+        customerId:
+          type: string
+        hasCreditCard:
+          type: boolean

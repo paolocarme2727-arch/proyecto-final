@@ -1,11 +1,13 @@
 package com.example.bank.credits.business.impl;
 
 import com.example.bank.credits.business.CreditProductService;
+import com.example.bank.credits.business.domain.CreditProductDomainService;
+import com.example.bank.credits.business.impl.strategy.CreditMovementValidationStrategy;
+import com.example.bank.credits.business.impl.strategy.CreditProductCreationValidationStrategy;
+import com.example.bank.credits.business.impl.strategy.CreditProductShapeValidationStrategy;
+import com.example.bank.credits.business.util.CreditBusinessUtils;
 import com.example.bank.credits.domain.CreditMovement;
-import com.example.bank.credits.domain.CreditMovementType;
 import com.example.bank.credits.domain.CreditProduct;
-import com.example.bank.credits.domain.CreditProductType;
-import com.example.bank.credits.domain.CustomerType;
 import com.example.bank.credits.events.CreditDebtStatusPublisher;
 import com.example.bank.credits.expose.model.CreditBalanceResponse;
 import com.example.bank.credits.expose.model.CreditCardExistenceResponse;
@@ -14,6 +16,8 @@ import com.example.bank.credits.expose.model.CreditProductRequest;
 import com.example.bank.credits.expose.model.MoneyRequest;
 import com.example.bank.credits.repository.CreditMovementRepository;
 import com.example.bank.credits.repository.CreditProductRepository;
+import com.example.bank.credits.util.enums.CreditMovementType;
+import com.example.bank.credits.util.enums.CreditProductType;
 import io.reactivex.rxjava3.core.Completable;
 import io.reactivex.rxjava3.core.Flowable;
 import io.reactivex.rxjava3.core.Single;
@@ -24,6 +28,7 @@ import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
@@ -42,6 +47,10 @@ public class CreditProductServiceImpl implements CreditProductService {
     private final CreditProductRepository productRepository;
     private final CreditMovementRepository movementRepository;
     private final CreditDebtStatusPublisher debtStatusPublisher;
+    private final CreditProductDomainService creditProductDomainService;
+    private final List<CreditProductShapeValidationStrategy> shapeValidationStrategies;
+    private final List<CreditProductCreationValidationStrategy> creationValidationStrategies;
+    private final List<CreditMovementValidationStrategy> movementValidationStrategies;
 
     /**
      * Creates a product after validating credit business rules.
@@ -49,10 +58,11 @@ public class CreditProductServiceImpl implements CreditProductService {
     @Override
     public Single<CreditProduct> create(CreditProductRequest request) {
         return validateNewProduct(request)
-                .andThen(Single.fromCallable(() -> registerInitialDisbursement(productRepository.save(toNewProduct(request)))))
+                .andThen(Single.fromCallable(() ->
+                        registerInitialDisbursement(productRepository.save(toNewProduct(request)))))
                 .flatMap(product -> publishDebtStatus(product).andThen(Single.just(product)))
                 .subscribeOn(Schedulers.io())
-                .doOnSuccess(product -> log.info("Created credit product {}", product.getId()));
+                .doOnSuccess(product -> log.info("Producto de crédito creado {}", product.getId()));
     }
 
     /**
@@ -70,7 +80,7 @@ public class CreditProductServiceImpl implements CreditProductService {
      */
     @Override
     public Single<CreditProduct> findById(String id) {
-        return findExisting(id);
+        return creditProductDomainService.findExistingProductReactive(id);
     }
 
     /**
@@ -78,21 +88,14 @@ public class CreditProductServiceImpl implements CreditProductService {
      */
     @Override
     public Single<CreditProduct> update(String id, CreditProductRequest request) {
-        return findExisting(id)
-                .map(product -> {
+        return creditProductDomainService.findExistingProductReactive(id)
+                .flatMap(product -> Single.fromCallable(() -> {
                     validateProductRequest(request);
-                    product.setCustomerId(request.getCustomerId());
-                    product.setCustomerType(toDomainCustomerType(request));
-                    product.setType(toDomainProductType(request));
-                    product.setCreditLimit(request.getCreditLimit());
-                    product.setOverdueDebt(Boolean.TRUE.equals(request.getOverdueDebt()));
-                    product.setUpdatedAt(LocalDateTime.now());
-                    validateProductShape(product);
-                    return productRepository.save(product);
-                })
+                    return productRepository.save(applyProductUpdate(product, request));
+                }))
                 .flatMap(product -> publishDebtStatus(product).andThen(Single.just(product)))
                 .subscribeOn(Schedulers.io())
-                .doOnSuccess(product -> log.info("Updated credit product {}", product.getId()));
+                .doOnSuccess(product -> log.info("Producto de crédito actualizado {}", product.getId()));
     }
 
     /**
@@ -100,13 +103,13 @@ public class CreditProductServiceImpl implements CreditProductService {
      */
     @Override
     public Single<Boolean> delete(String id) {
-        return findExisting(id)
-                .map(product -> {
+        return creditProductDomainService.findExistingProductReactive(id)
+                .flatMap(product -> Single.fromCallable(() -> {
                     productRepository.delete(product);
                     return Boolean.TRUE;
-                })
+                }))
                 .subscribeOn(Schedulers.io())
-                .doOnSuccess(ignored -> log.info("Deleted credit product {}", id));
+                .doOnSuccess(ignored -> log.info("Producto de crédito eliminado {}", id));
     }
 
     /**
@@ -114,12 +117,13 @@ public class CreditProductServiceImpl implements CreditProductService {
      */
     @Override
     public Single<CreditMovement> pay(String id, MoneyRequest request) {
-        return findExisting(id)
-                .map(product -> saveCreditMovement(product, request.getAmount(), CreditMovementType.PAYMENT))
-                .flatMap(movement -> findExisting(id)
+        return creditProductDomainService.findExistingProductReactive(id)
+                .flatMap(product -> Single.fromCallable(() ->
+                        saveCreditMovement(product, request.getAmount(), CreditMovementType.PAYMENT)))
+                .flatMap(movement -> creditProductDomainService.findExistingProductReactive(id)
                         .flatMap(product -> publishDebtStatus(product).andThen(Single.just(movement))))
                 .subscribeOn(Schedulers.io())
-                .doOnSuccess(movement -> log.info("Registered payment on product {}", id));
+                .doOnSuccess(movement -> log.info("Pago registrado en el producto {}", id));
     }
 
     /**
@@ -127,15 +131,13 @@ public class CreditProductServiceImpl implements CreditProductService {
      */
     @Override
     public Single<CreditMovement> charge(String id, MoneyRequest request) {
-        return findExisting(id)
-                .map(product -> {
-                    validateCardCharge(product, request.getAmount());
-                    return saveCreditMovement(product, request.getAmount(), CreditMovementType.CHARGE);
-                })
-                .flatMap(movement -> findExisting(id)
+        return creditProductDomainService.findExistingProductReactive(id)
+                .flatMap(product -> Single.fromCallable(() ->
+                        saveCreditMovement(product, request.getAmount(), CreditMovementType.CHARGE)))
+                .flatMap(movement -> creditProductDomainService.findExistingProductReactive(id)
                         .flatMap(product -> publishDebtStatus(product).andThen(Single.just(movement))))
                 .subscribeOn(Schedulers.io())
-                .doOnSuccess(movement -> log.info("Registered card charge on product {}", id));
+                .doOnSuccess(movement -> log.info("Consumo con tarjeta registrado en el producto {}", id));
     }
 
     /**
@@ -143,7 +145,7 @@ public class CreditProductServiceImpl implements CreditProductService {
      */
     @Override
     public Single<CreditBalanceResponse> getBalance(String id) {
-        return findExisting(id).map(this::toBalance);
+        return creditProductDomainService.findExistingProductReactive(id).map(this::toBalance);
     }
 
     /**
@@ -151,8 +153,10 @@ public class CreditProductServiceImpl implements CreditProductService {
      */
     @Override
     public Flowable<CreditMovement> findMovements(String id) {
-        return findExisting(id)
-                .map(product -> movementRepository.findByCreditProductIdOrderByCreatedAtDesc(product.getId()))
+        return Single.fromCallable(() -> {
+                    CreditProduct product = creditProductDomainService.findExistingProduct(id);
+                    return movementRepository.findByCreditProductIdOrderByCreatedAtDesc(product.getId());
+                })
                 .flattenAsFlowable(movements -> movements)
                 .subscribeOn(Schedulers.io());
     }
@@ -197,115 +201,113 @@ public class CreditProductServiceImpl implements CreditProductService {
      */
     @Override
     public Flowable<CreditMovement> findRecentCreditCardMovements(String id) {
-        return findExisting(id)
-                .map(product -> {
+        return Single.fromCallable(() -> {
+                    CreditProduct product = creditProductDomainService.findExistingProduct(id);
                     validateCardProduct(product);
-                    return movementRepository.findByCreditProductIdOrderByCreatedAtDesc(product.getId(), PageRequest.of(0, 10));
+                    return movementRepository.findByCreditProductIdOrderByCreatedAtDesc(
+                            product.getId(),
+                            PageRequest.of(0, 10));
                 })
                 .flattenAsFlowable(movements -> movements)
                 .subscribeOn(Schedulers.io());
     }
 
     private Completable validateNewProduct(CreditProductRequest request) {
-        return Completable.fromAction(() -> {
-            validateProductRequest(request);
-            if (productRepository.existsByCustomerIdAndOverdueDebtTrue(request.getCustomerId())) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Customer has overdue credit debt");
-            }
-            if (toDomainCustomerType(request) == CustomerType.PERSONAL
-                    && toDomainProductType(request) == CreditProductType.PERSONAL_LOAN
-                    && productRepository.existsByCustomerIdAndType(request.getCustomerId(), CreditProductType.PERSONAL_LOAN)) {
-                throw new ResponseStatusException(HttpStatus.CONFLICT, "Personal customer already has a personal loan");
-            }
-        });
+        return Completable.fromAction(() -> validateProductRequest(request))
+                .andThen(Completable.merge(creationValidationStrategies.stream()
+                        .map(strategy -> strategy.validate(request))
+                        .toList()));
     }
 
     private void validateProductRequest(CreditProductRequest request) {
-        if (toDomainCustomerType(request) == CustomerType.PERSONAL
-                && (toDomainProductType(request) == CreditProductType.BUSINESS_LOAN || toDomainProductType(request) == CreditProductType.BUSINESS_CREDIT_CARD)) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Personal customers cannot own business credit products");
-        }
-        if (toDomainCustomerType(request) == CustomerType.BUSINESS
-                && (toDomainProductType(request) == CreditProductType.PERSONAL_LOAN || toDomainProductType(request) == CreditProductType.PERSONAL_CREDIT_CARD)) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Business customers cannot own personal credit products");
-        }
-    }
-
-    private void validateCardCharge(CreditProduct product, BigDecimal amount) {
-        validateCardProduct(product);
-        if (product.getUsedAmount().add(amount).compareTo(product.getCreditLimit()) > 0) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Credit card limit exceeded");
-        }
+        shapeValidationStrategies.forEach(strategy -> strategy.validate(request));
     }
 
     private void validateCardProduct(CreditProduct product) {
-        if (!isCard(product.getType())) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Operation is allowed only for credit cards");
+        if (!CreditBusinessUtils.isCard(product.getType())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "La operación solo está permitida para tarjetas de crédito");
         }
     }
 
     private CreditMovement saveCreditMovement(CreditProduct product, BigDecimal amount, CreditMovementType type) {
-        if (type == CreditMovementType.PAYMENT && product.getOutstandingBalance().compareTo(amount) < 0) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Payment exceeds outstanding debt");
-        }
+        movementValidationStrategies.forEach(strategy -> strategy.validate(product, amount, type));
         BigDecimal signedAmount = type == CreditMovementType.PAYMENT ? amount.negate() : amount;
+        CreditProduct saved = productRepository.save(applyCreditMovement(product, signedAmount));
+        return movementRepository.save(toCreditMovement(saved, amount, type));
+    }
+
+    private CreditProduct applyCreditMovement(CreditProduct product, BigDecimal signedAmount) {
         product.setOutstandingBalance(product.getOutstandingBalance().add(signedAmount));
-        if (isCard(product.getType())) {
+        if (CreditBusinessUtils.isCard(product.getType())) {
             product.setUsedAmount(product.getUsedAmount().add(signedAmount));
         }
         product.setUpdatedAt(LocalDateTime.now());
-        CreditProduct saved = productRepository.save(product);
-        return movementRepository.save(CreditMovement.builder()
-                .creditProductId(saved.getId())
+        return product;
+    }
+
+    private CreditMovement toCreditMovement(CreditProduct product, BigDecimal amount, CreditMovementType type) {
+        return CreditMovement.builder()
+                .creditProductId(product.getId())
                 .type(type)
                 .amount(amount)
-                .resultingDebt(saved.getOutstandingBalance())
-                .availableCredit(calculateAvailableCredit(saved))
+                .resultingDebt(product.getOutstandingBalance())
+                .availableCredit(calculateAvailableCredit(product))
                 .createdAt(LocalDateTime.now())
-                .build());
+                .build();
     }
 
     private CreditProduct registerInitialDisbursement(CreditProduct product) {
         if (product.getOutstandingBalance().compareTo(BigDecimal.ZERO) > 0) {
-            movementRepository.save(CreditMovement.builder()
-                    .creditProductId(product.getId())
-                    .type(CreditMovementType.DISBURSEMENT)
-                    .amount(product.getOutstandingBalance())
-                    .resultingDebt(product.getOutstandingBalance())
-                    .availableCredit(calculateAvailableCredit(product))
-                    .createdAt(LocalDateTime.now())
-                    .build());
+            movementRepository.save(toDisbursementMovement(product));
         }
         return product;
     }
 
-    private Single<CreditProduct> findExisting(String id) {
-        return Single.fromCallable(() -> productRepository.findById(id)
-                        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Credit product not found")))
-                .subscribeOn(Schedulers.io());
+    private CreditMovement toDisbursementMovement(CreditProduct product) {
+        return CreditMovement.builder()
+                .creditProductId(product.getId())
+                .type(CreditMovementType.DISBURSEMENT)
+                .amount(product.getOutstandingBalance())
+                .resultingDebt(product.getOutstandingBalance())
+                .availableCredit(calculateAvailableCredit(product))
+                .createdAt(LocalDateTime.now())
+                .build();
     }
 
     private CreditProduct toNewProduct(CreditProductRequest request) {
         validateProductRequest(request);
-        BigDecimal initialDebt = request.getInitialDebt() == null ? BigDecimal.ZERO : request.getInitialDebt();
-        CreditProduct product = CreditProduct.builder()
+        BigDecimal initialDebt = CreditBusinessUtils.initialDebt(request);
+        return CreditProduct.builder()
                 .customerId(request.getCustomerId())
-                .customerType(toDomainCustomerType(request))
-                .type(toDomainProductType(request))
+                .customerType(CreditBusinessUtils.toDomainCustomerType(request))
+                .type(CreditBusinessUtils.toDomainProductType(request))
                 .creditLimit(request.getCreditLimit())
-                .usedAmount(isCard(toDomainProductType(request)) ? initialDebt : BigDecimal.ZERO)
+                .usedAmount(CreditBusinessUtils.isCard(CreditBusinessUtils.toDomainProductType(request))
+                        ? initialDebt
+                        : BigDecimal.ZERO)
                 .outstandingBalance(initialDebt)
                 .overdueDebt(Boolean.TRUE.equals(request.getOverdueDebt()))
                 .createdAt(LocalDateTime.now())
                 .updatedAt(LocalDateTime.now())
                 .build();
-        validateProductShape(product);
+    }
+
+    private CreditProduct applyProductUpdate(CreditProduct product, CreditProductRequest request) {
+        product.setCustomerId(request.getCustomerId());
+        product.setCustomerType(CreditBusinessUtils.toDomainCustomerType(request));
+        product.setType(CreditBusinessUtils.toDomainProductType(request));
+        product.setCreditLimit(request.getCreditLimit());
+        product.setOverdueDebt(Boolean.TRUE.equals(request.getOverdueDebt()));
+        product.setUpdatedAt(LocalDateTime.now());
+        validateCurrentDebtCoverage(product);
         return product;
     }
 
-    private void validateProductShape(CreditProduct product) {
+    private void validateCurrentDebtCoverage(CreditProduct product) {
         if (product.getCreditLimit().compareTo(product.getOutstandingBalance()) < 0) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Credit limit cannot be lower than current debt");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "El límite de crédito no puede ser menor que la deuda actual");
         }
     }
 
@@ -322,11 +324,9 @@ public class CreditProductServiceImpl implements CreditProductService {
     }
 
     private BigDecimal calculateAvailableCredit(CreditProduct product) {
-        return isCard(product.getType()) ? product.getCreditLimit().subtract(product.getUsedAmount()) : BigDecimal.ZERO;
-    }
-
-    private boolean isCard(CreditProductType type) {
-        return type == CreditProductType.PERSONAL_CREDIT_CARD || type == CreditProductType.BUSINESS_CREDIT_CARD;
+        return CreditBusinessUtils.isCard(product.getType())
+                ? product.getCreditLimit().subtract(product.getUsedAmount())
+                : BigDecimal.ZERO;
     }
 
     private CreditProductReportResponse toCreditReport(
@@ -338,7 +338,9 @@ public class CreditProductServiceImpl implements CreditProductService {
         BigDecimal totalAmount = movements.stream()
                 .map(CreditMovement::getAmount)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
-        Set<String> productIds = movements.stream().map(CreditMovement::getCreditProductId).collect(java.util.stream.Collectors.toSet());
+        Set<String> productIds = movements.stream()
+                .map(CreditMovement::getCreditProductId)
+                .collect(Collectors.toSet());
         return new CreditProductReportResponse()
                 .productType(type)
                 .from(from)
@@ -359,14 +361,4 @@ public class CreditProductServiceImpl implements CreditProductService {
                 .availableCredit(movement.getAvailableCredit())
                 .createdAt(movement.getCreatedAt().atOffset(ZoneOffset.UTC));
     }
-
-    private CustomerType toDomainCustomerType(CreditProductRequest request) {
-        return CustomerType.valueOf(request.getCustomerType().getValue());
-    }
-
-    private CreditProductType toDomainProductType(CreditProductRequest request) {
-        return CreditProductType.valueOf(request.getType().getValue());
-    }
 }
-
-

@@ -1,0 +1,86 @@
+openapi: 3.0.3
+info:
+  title: API de reportes de crédito
+  version: 1.0.0
+servers:
+  - url: http://localhost:8083
+tags:
+  - name: CreditReport
+paths:
+  /api/v1/credits/reports/products/{type}:
+    get:
+      tags: [CreditReport]
+      operationId: getCreditProductReport
+      summary: Consultar reporte general de créditos por rango de tiempo
+      parameters:
+        - name: type
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/CreditProductType'
+        - name: from
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date-time
+        - name: to
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date-time
+      responses:
+        '200':
+          description: Reporte de producto de crédito
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreditProductReportResponse'
+components:
+  schemas:
+    CreditProductType:
+      type: string
+      enum: [PERSONAL_LOAN, BUSINESS_LOAN, PERSONAL_CREDIT_CARD, BUSINESS_CREDIT_CARD]
+    CreditMovementType:
+      type: string
+      enum: [DISBURSEMENT, PAYMENT, CHARGE]
+    CreditMovement:
+      type: object
+      properties:
+        id:
+          type: string
+        creditProductId:
+          type: string
+        type:
+          $ref: '#/components/schemas/CreditMovementType'
+        amount:
+          type: number
+        resultingDebt:
+          type: number
+        availableCredit:
+          type: number
+        createdAt:
+          type: string
+          format: date-time
+    CreditProductReportResponse:
+      type: object
+      properties:
+        productType:
+          $ref: '#/components/schemas/CreditProductType'
+        from:
+          type: string
+          format: date-time
+        to:
+          type: string
+          format: date-time
+        productCount:
+          type: integer
+        movementCount:
+          type: integer
+        totalAmount:
+          type: number
+        movements:
+          type: array
+          items:
+            $ref: '#/components/schemas/CreditMovement'

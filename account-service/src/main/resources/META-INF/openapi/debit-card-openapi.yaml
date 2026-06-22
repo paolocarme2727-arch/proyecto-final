@@ -1,0 +1,47 @@
+openapi: 3.0.3
+info:
+  title: API de tarjetas de débito
+  version: 1.0.0
+servers:
+  - url: http://localhost:8082
+tags:
+  - name: DebitCard
+paths:
+  /api/v1/accounts/debit-cards:
+    post:
+      tags: [DebitCard]
+      operationId: createDebitCard
+      summary: Crear una tarjeta de débito asociada a una cuenta
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: './common-openapi.yaml#/components/schemas/DebitCardRequest'
+      responses:
+        '201':
+          description: Tarjeta de débito creada
+          content:
+            application/json:
+              schema:
+                $ref: './common-openapi.yaml#/components/schemas/DebitCard'
+  /api/v1/accounts/debit-cards/{id}/payments:
+    post:
+      tags: [DebitCard]
+      operationId: payWithDebitCard
+      summary: Pagar con una tarjeta de débito
+      parameters:
+        - $ref: './common-openapi.yaml#/components/parameters/Id'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: './common-openapi.yaml#/components/schemas/DebitCardPaymentRequest'
+      responses:
+        '200':
+          description: Movimiento de pago con tarjeta de débito
+          content:
+            application/json:
+              schema:
+                $ref: './common-openapi.yaml#/components/schemas/AccountMovement'

@@ -1,0 +1,79 @@
+openapi: 3.0.3
+info:
+  title: API de vinculación de tarjeta de monedero Yanki
+  version: 1.0.0
+servers:
+  - url: http://localhost:8084
+tags:
+  - name: WalletDebitCard
+paths:
+  /api/v1/wallets/{id}/debit-card:
+    put:
+      tags: [WalletDebitCard]
+      operationId: linkDebitCard
+      summary: Vincular un monedero a una tarjeta de débito del banco
+      parameters:
+        - $ref: '#/components/parameters/Id'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DebitCardLinkRequest'
+      responses:
+        '200':
+          description: Monedero vinculado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Wallet'
+components:
+  parameters:
+    Id:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+  schemas:
+    DocumentType:
+      type: string
+      enum: [DNI, CEX, PASSPORT]
+    DebitCardLinkRequest:
+      type: object
+      required: [debitCardId]
+      properties:
+        debitCardId:
+          type: string
+    WalletRequest:
+      type: object
+      required: [documentType, documentNumber, phoneNumber, imei, email]
+      properties:
+        documentType:
+          $ref: '#/components/schemas/DocumentType'
+        documentNumber:
+          type: string
+        phoneNumber:
+          type: string
+        imei:
+          type: string
+        email:
+          type: string
+          format: email
+    Wallet:
+      allOf:
+        - $ref: '#/components/schemas/WalletRequest'
+        - type: object
+          properties:
+            id:
+              type: string
+            debitCardId:
+              type: string
+            balance:
+              type: number
+            createdAt:
+              type: string
+              format: date-time
+            updatedAt:
+              type: string
+              format: date-time

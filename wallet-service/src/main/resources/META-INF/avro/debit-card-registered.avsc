@@ -1,0 +1,11 @@
+{
+  "type": "record",
+  "name": "DebitCardRegisteredEvent",
+  "namespace": "com.example.bank.contracts",
+  "fields": [
+    { "name": "debitCardId", "type": "string" },
+    { "name": "accountId", "type": "string" },
+    { "name": "active", "type": "boolean" },
+    { "name": "createdAt", "type": "string" }
+  ]
+}

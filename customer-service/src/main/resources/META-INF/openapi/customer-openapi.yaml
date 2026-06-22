@@ -1,0 +1,127 @@
+openapi: 3.0.3
+info:
+  title: API de clientes
+  version: 1.0.0
+servers:
+  - url: http://localhost:8081
+tags:
+  - name: Customer
+paths:
+  /api/v1/customers:
+    post:
+      tags: [Customer]
+      operationId: createCustomer
+      summary: Crear un cliente
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CustomerRequest'
+      responses:
+        '201':
+          description: Cliente creado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Customer'
+    get:
+      tags: [Customer]
+      operationId: findAllCustomers
+      summary: Listar clientes
+      responses:
+        '200':
+          description: Lista de clientes
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Customer'
+  /api/v1/customers/{id}:
+    get:
+      tags: [Customer]
+      operationId: findCustomerById
+      summary: Buscar un cliente por id
+      parameters:
+        - $ref: '#/components/parameters/Id'
+      responses:
+        '200':
+          description: Cliente encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Customer'
+    put:
+      tags: [Customer]
+      operationId: updateCustomer
+      summary: Actualizar un cliente
+      parameters:
+        - $ref: '#/components/parameters/Id'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CustomerRequest'
+      responses:
+        '200':
+          description: Cliente actualizado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Customer'
+    delete:
+      tags: [Customer]
+      operationId: deleteCustomer
+      summary: Eliminar un cliente
+      parameters:
+        - $ref: '#/components/parameters/Id'
+      responses:
+        '204':
+          description: Cliente eliminado
+components:
+  parameters:
+    Id:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+  schemas:
+    CustomerType:
+      type: string
+      enum: [PERSONAL, BUSINESS]
+    CustomerProfile:
+      type: string
+      enum: [REGULAR, VIP, PYME]
+    CustomerRequest:
+      type: object
+      required: [type, documentNumber, legalName]
+      properties:
+        type:
+          $ref: '#/components/schemas/CustomerType'
+        profile:
+          $ref: '#/components/schemas/CustomerProfile'
+        documentNumber:
+          type: string
+        legalName:
+          type: string
+        email:
+          type: string
+          format: email
+        phoneNumber:
+          type: string
+    Customer:
+      allOf:
+        - $ref: '#/components/schemas/CustomerRequest'
+        - type: object
+          properties:
+            id:
+              type: string
+            createdAt:
+              type: string
+              format: date-time
+            updatedAt:
+              type: string
+              format: date-time

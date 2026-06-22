@@ -1,0 +1,10 @@
+{
+  "type": "record",
+  "name": "WalletDebitCardLinkedEvent",
+  "namespace": "com.example.bank.contracts",
+  "fields": [
+    { "name": "walletId", "type": "string" },
+    { "name": "debitCardId", "type": "string" },
+    { "name": "createdAt", "type": "string" }
+  ]
+}

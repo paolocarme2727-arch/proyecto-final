@@ -3,6 +3,10 @@ package com.example.bank.accounts.domain;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
+
+import com.example.bank.accounts.util.enums.AccountTypeEnum;
+import com.example.bank.accounts.util.enums.CustomerProfileEnum;
+import com.example.bank.accounts.util.enums.CustomerTypeEnum;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -27,10 +31,10 @@ public class BankAccount {
     private String id;
     @Indexed
     private String customerId;
-    private CustomerType customerType;
-    private CustomerProfile customerProfile;
+    private CustomerTypeEnum customerTypeEnum;
+    private CustomerProfileEnum customerProfileEnum;
     @Indexed
-    private AccountType type;
+    private AccountTypeEnum type;
     private BigDecimal balance;
     private BigDecimal maintenanceFee;
     private BigDecimal minimumOpeningAmount;

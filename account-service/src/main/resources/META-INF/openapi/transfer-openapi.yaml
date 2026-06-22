@@ -1,0 +1,27 @@
+openapi: 3.0.3
+info:
+  title: API de transferencias
+  version: 1.0.0
+servers:
+  - url: http://localhost:8082
+tags:
+  - name: Transfer
+paths:
+  /api/v1/accounts/transfers:
+    post:
+      tags: [Transfer]
+      operationId: transferBetweenAccounts
+      summary: Transferir dinero entre cuentas bancarias
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: './common-openapi.yaml#/components/schemas/TransferRequest'
+      responses:
+        '200':
+          description: Resultado de la transferencia
+          content:
+            application/json:
+              schema:
+                $ref: './common-openapi.yaml#/components/schemas/TransferResponse'

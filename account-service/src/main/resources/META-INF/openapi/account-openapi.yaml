@@ -1,0 +1,96 @@
+openapi: 3.0.3
+info:
+  title: API de cuentas
+  version: 1.0.0
+servers:
+  - url: http://localhost:8082
+tags:
+  - name: Account
+paths:
+  /api/v1/accounts:
+    post:
+      tags: [Account]
+      operationId: createAccount
+      summary: Crear una cuenta bancaria
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: './common-openapi.yaml#/components/schemas/AccountRequest'
+      responses:
+        '201':
+          description: Cuenta creada
+          content:
+            application/json:
+              schema:
+                $ref: './common-openapi.yaml#/components/schemas/BankAccount'
+    get:
+      tags: [Account]
+      operationId: findAllAccounts
+      summary: Listar cuentas bancarias
+      responses:
+        '200':
+          description: Lista de cuentas
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: './common-openapi.yaml#/components/schemas/BankAccount'
+  /api/v1/accounts/{id}:
+    get:
+      tags: [Account]
+      operationId: findAccountById
+      summary: Buscar una cuenta bancaria por id
+      parameters:
+        - $ref: './common-openapi.yaml#/components/parameters/Id'
+      responses:
+        '200':
+          description: Cuenta encontrada
+          content:
+            application/json:
+              schema:
+                $ref: './common-openapi.yaml#/components/schemas/BankAccount'
+    put:
+      tags: [Account]
+      operationId: updateAccount
+      summary: Actualizar una cuenta bancaria
+      parameters:
+        - $ref: './common-openapi.yaml#/components/parameters/Id'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: './common-openapi.yaml#/components/schemas/AccountRequest'
+      responses:
+        '200':
+          description: Cuenta actualizada
+          content:
+            application/json:
+              schema:
+                $ref: './common-openapi.yaml#/components/schemas/BankAccount'
+    delete:
+      tags: [Account]
+      operationId: deleteAccount
+      summary: Eliminar una cuenta bancaria
+      parameters:
+        - $ref: './common-openapi.yaml#/components/parameters/Id'
+      responses:
+        '204':
+          description: Cuenta eliminada
+  /api/v1/accounts/{id}/balance:
+    get:
+      tags: [Account]
+      operationId: getAccountBalance
+      summary: Consultar saldo disponible
+      parameters:
+        - $ref: './common-openapi.yaml#/components/parameters/Id'
+      responses:
+        '200':
+          description: Saldo
+          content:
+            application/json:
+              schema:
+                $ref: './common-openapi.yaml#/components/schemas/BalanceResponse'

@@ -1,8 +1,14 @@
 package com.example.bank.wallets.business.impl;
 
-import com.example.bank.wallets.proxy.DebitCardCatalog;
+import com.example.bank.wallets.events.DebitCardCatalog;
+import com.example.bank.wallets.events.WalletEventPublisher;
 import com.example.bank.wallets.service.DocumentTypeCatalog;
-import com.example.bank.wallets.proxy.WalletEventPublisher;
+import com.example.bank.wallets.business.domain.WalletDomainService;
+import com.example.bank.wallets.business.domain.impl.WalletDomainServiceImpl;
+import com.example.bank.wallets.business.impl.strategy.DifferentWalletsValidationStrategy;
+import com.example.bank.wallets.business.impl.strategy.SupportedDocumentTypeValidationStrategy;
+import com.example.bank.wallets.business.impl.strategy.UniqueWalletPhoneValidationStrategy;
+import com.example.bank.wallets.business.impl.strategy.WalletBalanceValidationStrategy;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -39,7 +45,18 @@ class WalletServiceImplTest {
     private final DocumentTypeCatalog documentTypeCatalog = mock(DocumentTypeCatalog.class);
     private final DebitCardCatalog debitCardCatalog = mock(DebitCardCatalog.class);
     private final WalletEventPublisher eventPublisher = mock(WalletEventPublisher.class);
-    private final WalletServiceImpl walletService = new WalletServiceImpl(walletRepository, documentTypeCatalog, debitCardCatalog, eventPublisher);
+    private final WalletDomainService walletDomainService = new WalletDomainServiceImpl(walletRepository);
+    private final WalletServiceImpl walletService = new WalletServiceImpl(
+            walletRepository,
+            debitCardCatalog,
+            eventPublisher,
+            walletDomainService,
+            java.util.List.of(
+                    new SupportedDocumentTypeValidationStrategy(documentTypeCatalog),
+                    new UniqueWalletPhoneValidationStrategy(walletRepository)),
+            java.util.List.of(
+                    new DifferentWalletsValidationStrategy(),
+                    new WalletBalanceValidationStrategy()));
 
     @BeforeEach
     void useImmediateScheduler() {
@@ -58,7 +75,8 @@ class WalletServiceImplTest {
     void givenSupportedDocumentType_whenCreateWallet_thenPersistsWallet() {
         WalletRequest request = new WalletRequest(DocumentType.DNI, "12345678", "999999999", "imei-1", "user@example.com");
 
-        when(documentTypeCatalog.isSupported(com.example.bank.wallets.domain.DocumentType.DNI)).thenReturn(Single.just(Boolean.TRUE));
+        when(documentTypeCatalog.isSupported(com.example.bank.wallets.util.enums.DocumentType.DNI))
+                .thenReturn(Single.just(Boolean.TRUE));
         when(walletRepository.existsByPhoneNumber("999999999")).thenReturn(Boolean.FALSE);
         when(walletRepository.save(any(Wallet.class))).thenAnswer(invocation -> invocation.getArgument(0));
 

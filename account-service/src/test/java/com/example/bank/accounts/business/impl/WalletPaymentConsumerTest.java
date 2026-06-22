@@ -4,10 +4,11 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.example.bank.accounts.business.DebitCardService;
 import com.example.bank.accounts.domain.AccountMovement;
-import com.example.bank.accounts.domain.MovementType;
+import com.example.bank.accounts.events.WalletPaymentConsumer;
 import com.example.bank.accounts.events.WalletPaymentEvent;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.example.bank.accounts.util.enums.MovementTypeEnum;
 import io.reactivex.rxjava3.core.Single;
 import io.reactivex.rxjava3.plugins.RxJavaPlugins;
 import io.reactivex.rxjava3.schedulers.Schedulers;
@@ -23,8 +24,8 @@ import org.junit.jupiter.api.Test;
  */
 class WalletPaymentConsumerTest {
 
-    private final BankAccountServiceImpl accountService = mock(BankAccountServiceImpl.class);
-    private final WalletPaymentConsumer consumer = new WalletPaymentConsumer(accountService, new ObjectMapper());
+    private final DebitCardService debitCardService = mock(DebitCardService.class);
+    private final WalletPaymentConsumer consumer = new WalletPaymentConsumer(debitCardService);
 
     @BeforeEach
     void useImmediateScheduler() {
@@ -49,9 +50,11 @@ class WalletPaymentConsumerTest {
                 BigDecimal.valueOf(25),
                 LocalDateTime.now());
 
-        when(accountService.registerWalletDebitCardMovement("source-card", BigDecimal.valueOf(25), MovementType.WALLET_PAYMENT_OUT))
+        when(debitCardService.registerWalletDebitCardMovement(
+                "source-card", BigDecimal.valueOf(25), MovementTypeEnum.WALLET_PAYMENT_OUT))
                 .thenReturn(Single.just(AccountMovement.builder().build()));
-        when(accountService.registerWalletDebitCardMovement("target-card", BigDecimal.valueOf(25), MovementType.WALLET_PAYMENT_IN))
+        when(debitCardService.registerWalletDebitCardMovement(
+                "target-card", BigDecimal.valueOf(25), MovementTypeEnum.WALLET_PAYMENT_IN))
                 .thenReturn(Single.just(AccountMovement.builder().build()));
 
         consumer.process(event)
@@ -60,8 +63,9 @@ class WalletPaymentConsumerTest {
                 .assertComplete()
                 .assertNoErrors();
 
-        verify(accountService).registerWalletDebitCardMovement("source-card", BigDecimal.valueOf(25), MovementType.WALLET_PAYMENT_OUT);
-        verify(accountService).registerWalletDebitCardMovement("target-card", BigDecimal.valueOf(25), MovementType.WALLET_PAYMENT_IN);
+        verify(debitCardService).registerWalletDebitCardMovement(
+                "source-card", BigDecimal.valueOf(25), MovementTypeEnum.WALLET_PAYMENT_OUT);
+        verify(debitCardService).registerWalletDebitCardMovement(
+                "target-card", BigDecimal.valueOf(25), MovementTypeEnum.WALLET_PAYMENT_IN);
     }
 }
-

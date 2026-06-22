@@ -6,6 +6,7 @@ import static org.mockito.ArgumentMatchers.anyCollection;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import com.example.bank.credits.business.domain.CreditProductDomainService;
 import com.example.bank.credits.events.CreditDebtStatusPublisher;
 import com.example.bank.credits.repository.CreditMovementRepository;
 import com.example.bank.credits.repository.CreditProductRepository;
@@ -26,7 +27,15 @@ class CreditProductServiceImplTest {
     private final CreditProductRepository productRepository = mock(CreditProductRepository.class);
     private final CreditMovementRepository movementRepository = mock(CreditMovementRepository.class);
     private final CreditDebtStatusPublisher debtStatusPublisher = mock(CreditDebtStatusPublisher.class);
-    private final CreditProductServiceImpl creditProductService = new CreditProductServiceImpl(productRepository, movementRepository, debtStatusPublisher);
+    private final CreditProductDomainService domainService = mock(CreditProductDomainService.class);
+    private final CreditProductServiceImpl creditProductService = new CreditProductServiceImpl(
+            productRepository,
+            movementRepository,
+            debtStatusPublisher,
+            domainService,
+            java.util.List.of(),
+            java.util.List.of(),
+            java.util.List.of());
 
     @BeforeEach
     void useImmediateScheduler() {

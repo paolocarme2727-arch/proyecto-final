@@ -1,7 +1,7 @@
 package com.example.bank.credits.repository;
 
 import com.example.bank.credits.domain.CreditProduct;
-import com.example.bank.credits.domain.CreditProductType;
+import com.example.bank.credits.util.enums.CreditProductType;
 import java.util.Collection;
 import java.util.List;
 import org.springframework.data.mongodb.repository.MongoRepository;

@@ -21,9 +21,9 @@ public class BankAccountMapper {
         return new BankAccount()
                 .id(account.getId())
                 .customerId(account.getCustomerId())
-                .customerType(com.example.bank.accounts.expose.model.CustomerType.fromValue(account.getCustomerType().name()))
+                .customerType(com.example.bank.accounts.expose.model.CustomerType.fromValue(account.getCustomerTypeEnum().name()))
                 .customerProfile(com.example.bank.accounts.expose.model.CustomerProfile.fromValue(
-                        account.getCustomerProfile() == null ? "REGULAR" : account.getCustomerProfile().name()))
+                        account.getCustomerProfileEnum() == null ? "REGULAR" : account.getCustomerProfileEnum().name()))
                 .type(com.example.bank.accounts.expose.model.AccountType.fromValue(account.getType().name()))
                 .balance(account.getBalance())
                 .maintenanceFee(account.getMaintenanceFee())

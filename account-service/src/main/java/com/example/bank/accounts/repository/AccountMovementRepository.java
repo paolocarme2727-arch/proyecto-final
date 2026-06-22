@@ -1,7 +1,7 @@
 package com.example.bank.accounts.repository;
 
 import com.example.bank.accounts.domain.AccountMovement;
-import com.example.bank.accounts.domain.MovementType;
+import com.example.bank.accounts.util.enums.MovementTypeEnum;
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
@@ -38,7 +38,7 @@ public interface AccountMovementRepository extends MongoRepository<AccountMoveme
      * @param pageable page settings
      * @return limited movement history
      */
-    List<AccountMovement> findByAccountIdAndTypeOrderByCreatedAtDesc(String accountId, MovementType type, Pageable pageable);
+    List<AccountMovement> findByAccountIdAndTypeOrderByCreatedAtDesc(String accountId, MovementTypeEnum type, Pageable pageable);
 
     /**
      * Finds movements for accounts in a time range.

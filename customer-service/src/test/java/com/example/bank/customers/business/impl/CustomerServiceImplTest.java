@@ -5,6 +5,8 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import com.example.bank.customers.business.domain.CustomerDomainService;
+import com.example.bank.customers.business.impl.strategy.UniqueDocumentValidationStrategy;
 import com.example.bank.customers.domain.Customer;
 import com.example.bank.customers.repository.CustomerRepository;
 import com.example.bank.customers.expose.model.CustomerProfile;
@@ -25,7 +27,11 @@ import org.junit.jupiter.api.Test;
 class CustomerServiceImplTest {
 
     private final CustomerRepository customerRepository = mock(CustomerRepository.class);
-    private final CustomerServiceImpl customerService = new CustomerServiceImpl(customerRepository);
+    private final CustomerDomainService customerDomainService = mock(CustomerDomainService.class);
+    private final CustomerServiceImpl customerService = new CustomerServiceImpl(
+            customerRepository,
+            customerDomainService,
+            java.util.List.of(new UniqueDocumentValidationStrategy(customerRepository)));
 
     @BeforeEach
     void useImmediateScheduler() {
@@ -55,7 +61,7 @@ class CustomerServiceImplTest {
                 .assertComplete()
                 .assertNoErrors()
                 .assertValue(created -> {
-                    assertThat(created.getProfile()).isEqualTo(com.example.bank.customers.domain.CustomerProfile.VIP);
+                    assertThat(created.getProfile()).isEqualTo(com.example.bank.customers.util.enums.CustomerProfile.VIP);
                     assertThat(created.getDocumentNumber()).isEqualTo("12345678");
                     return true;
                 });

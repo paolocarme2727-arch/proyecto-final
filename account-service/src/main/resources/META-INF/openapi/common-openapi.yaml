@@ -1,0 +1,212 @@
+openapi: 3.0.3
+info:
+  title: Esquemas comunes del servicio de cuentas
+  version: 1.0.0
+paths: {}
+components:
+  parameters:
+    Id:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+  requestBodies:
+    Money:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/MoneyRequest'
+  schemas:
+    AccountType:
+      type: string
+      enum: [SAVINGS, CHECKING, FIXED_TERM]
+    CustomerType:
+      type: string
+      enum: [PERSONAL, BUSINESS]
+    CustomerProfile:
+      type: string
+      enum: [REGULAR, VIP, PYME]
+    MovementType:
+      type: string
+      enum: [DEPOSIT, WITHDRAWAL, TRANSFER_IN, TRANSFER_OUT, DEBIT_CARD_PAYMENT, WALLET_PAYMENT_IN, WALLET_PAYMENT_OUT]
+    AccountRequest:
+      type: object
+      required: [customerId, customerType, type]
+      properties:
+        customerId:
+          type: string
+        customerType:
+          $ref: '#/components/schemas/CustomerType'
+        customerProfile:
+          $ref: '#/components/schemas/CustomerProfile'
+        type:
+          $ref: '#/components/schemas/AccountType'
+        initialBalance:
+          type: number
+        minimumOpeningAmount:
+          type: number
+        movementDay:
+          type: integer
+        holders:
+          type: array
+          items:
+            type: string
+        authorizedSigners:
+          type: array
+          items:
+            type: string
+    MoneyRequest:
+      type: object
+      required: [amount]
+      properties:
+        amount:
+          type: number
+          minimum: 0.01
+    TransferRequest:
+      type: object
+      required: [sourceAccountId, targetAccountId, amount]
+      properties:
+        sourceAccountId:
+          type: string
+        targetAccountId:
+          type: string
+        amount:
+          type: number
+          minimum: 0.01
+        description:
+          type: string
+    DebitCardRequest:
+      type: object
+      required: [customerId, accountId, cardNumber]
+      properties:
+        customerId:
+          type: string
+        accountId:
+          type: string
+        cardNumber:
+          type: string
+    DebitCardPaymentRequest:
+      type: object
+      required: [amount]
+      properties:
+        amount:
+          type: number
+          minimum: 0.01
+        merchant:
+          type: string
+    TransferResponse:
+      type: object
+      properties:
+        sourceAccountId:
+          type: string
+        targetAccountId:
+          type: string
+        amount:
+          type: number
+        sourceMovementId:
+          type: string
+        targetMovementId:
+          type: string
+        sourceBalance:
+          type: number
+        targetBalance:
+          type: number
+        createdAt:
+          type: string
+          format: date-time
+    BankAccount:
+      allOf:
+        - $ref: '#/components/schemas/AccountRequest'
+        - type: object
+          properties:
+            id:
+              type: string
+            balance:
+              type: number
+            maintenanceFee:
+              type: number
+            minimumOpeningAmount:
+              type: number
+            minimumDailyAverageAmount:
+              type: number
+            monthlyMovementLimit:
+              type: integer
+            monthlyMovementCount:
+              type: integer
+            freeTransactionLimit:
+              type: integer
+            transactionFee:
+              type: number
+            chargedFees:
+              type: number
+            createdAt:
+              type: string
+              format: date-time
+            updatedAt:
+              type: string
+              format: date-time
+    AccountMovement:
+      type: object
+      properties:
+        id:
+          type: string
+        accountId:
+          type: string
+        type:
+          $ref: '#/components/schemas/MovementType'
+        amount:
+          type: number
+        fee:
+          type: number
+        resultingBalance:
+          type: number
+        createdAt:
+          type: string
+          format: date-time
+    BalanceResponse:
+      type: object
+      properties:
+        productId:
+          type: string
+        availableBalance:
+          type: number
+    AccountProductReportResponse:
+      type: object
+      properties:
+        productType:
+          $ref: '#/components/schemas/AccountType'
+        from:
+          type: string
+          format: date-time
+        to:
+          type: string
+          format: date-time
+        productCount:
+          type: integer
+        movementCount:
+          type: integer
+        totalAmount:
+          type: number
+        totalFees:
+          type: number
+        movements:
+          type: array
+          items:
+            $ref: '#/components/schemas/AccountMovement'
+    DebitCard:
+      allOf:
+        - $ref: '#/components/schemas/DebitCardRequest'
+        - type: object
+          properties:
+            id:
+              type: string
+            active:
+              type: boolean
+            createdAt:
+              type: string
+              format: date-time
+            updatedAt:
+              type: string
+              format: date-time

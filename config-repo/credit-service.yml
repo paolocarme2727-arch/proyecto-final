@@ -10,6 +10,14 @@ spring:
       port: 6379
   kafka:
     bootstrap-servers: localhost:9092
+    producer:
+      retries: 3
+      value-serializer: org.apache.kafka.common.serialization.ByteArraySerializer
+
+banking:
+  kafka:
+    retry:
+      max-attempts: 3
 
 logging:
   level:

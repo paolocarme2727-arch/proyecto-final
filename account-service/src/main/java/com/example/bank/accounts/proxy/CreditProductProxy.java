@@ -44,11 +44,10 @@ public class CreditProductProxy {
     }
 
     private Single<Boolean> creditCardFallback(String customerId, Throwable throwable) {
-        log.warn("Credit card validation failed for customer {}", customerId, throwable);
+        log.warn("Falló la validación de tarjeta de crédito para el cliente {}", customerId, throwable);
         return Single.just(Boolean.FALSE);
     }
 
     private record CreditCardExistenceResponse(boolean hasCreditCard) {
     }
 }
-

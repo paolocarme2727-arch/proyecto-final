@@ -1,6 +1,7 @@
 package com.example.bank.wallets.service;
 
-import com.example.bank.wallets.domain.DocumentType;
+import com.example.bank.wallets.util.Constants;
+import com.example.bank.wallets.util.enums.DocumentType;
 import io.reactivex.rxjava3.core.Single;
 import io.reactivex.rxjava3.schedulers.Schedulers;
 import java.util.Arrays;
@@ -14,8 +15,6 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class DocumentTypeCatalog {
-
-    private static final String DOCUMENT_TYPES_KEY = "catalog:wallet-document-types";
 
     private final StringRedisTemplate redisTemplate;
 
@@ -36,18 +35,19 @@ public class DocumentTypeCatalog {
      */
     public Single<Boolean> isSupported(DocumentType documentType) {
         return Single.fromCallable(() -> {
-                    Long size = redisTemplate.opsForSet().size(DOCUMENT_TYPES_KEY);
+                    Long size = redisTemplate.opsForSet().size(Constants.DOCUMENT_TYPES_KEY);
                     if (size == null || size == 0) {
                         seedDocumentTypes();
                     }
-                    return Boolean.TRUE.equals(redisTemplate.opsForSet().isMember(DOCUMENT_TYPES_KEY, documentType.name()));
+                    return Boolean.TRUE.equals(redisTemplate.opsForSet()
+                            .isMember(Constants.DOCUMENT_TYPES_KEY, documentType.name()));
                 })
                 .subscribeOn(Schedulers.io());
     }
 
     private Long seedDocumentTypes() {
         Set<String> values = Arrays.stream(DocumentType.values()).map(Enum::name).collect(Collectors.toSet());
-        return redisTemplate.opsForSet().add(DOCUMENT_TYPES_KEY, values.toArray(String[]::new));
+        return redisTemplate.opsForSet().add(Constants.DOCUMENT_TYPES_KEY, values.toArray(String[]::new));
     }
 }
 

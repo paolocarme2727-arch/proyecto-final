@@ -22,6 +22,6 @@ public class FallbackController {
     @RequestMapping(method = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE})
     @ResponseStatus(HttpStatus.SERVICE_UNAVAILABLE)
     public Map<String, String> fallback() {
-        return Map.of("message", "Service is temporarily unavailable");
+        return Map.of("message", "El servicio no está disponible temporalmente");
     }
 }

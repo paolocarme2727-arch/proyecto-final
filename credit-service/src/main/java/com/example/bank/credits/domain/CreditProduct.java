@@ -1,5 +1,7 @@
 package com.example.bank.credits.domain;
 
+import com.example.bank.credits.util.enums.CreditProductType;
+import com.example.bank.credits.util.enums.CustomerType;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;

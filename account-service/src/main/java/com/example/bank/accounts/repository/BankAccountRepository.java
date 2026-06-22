@@ -1,6 +1,6 @@
 package com.example.bank.accounts.repository;
 
-import com.example.bank.accounts.domain.AccountType;
+import com.example.bank.accounts.util.enums.AccountTypeEnum;
 import com.example.bank.accounts.domain.BankAccount;
 import java.util.List;
 import org.springframework.data.mongodb.repository.MongoRepository;
@@ -25,7 +25,7 @@ public interface BankAccountRepository extends MongoRepository<BankAccount, Stri
      * @param type account type
      * @return true when an account exists
      */
-    boolean existsByCustomerIdAndType(String customerId, AccountType type);
+    boolean existsByCustomerIdAndType(String customerId, AccountTypeEnum type);
 
     /**
      * Finds accounts by product type.
@@ -33,6 +33,6 @@ public interface BankAccountRepository extends MongoRepository<BankAccount, Stri
      * @param type account product type
      * @return matching accounts
      */
-    List<BankAccount> findByType(AccountType type);
+    List<BankAccount> findByType(AccountTypeEnum type);
 }
 

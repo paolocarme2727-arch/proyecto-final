@@ -1,5 +1,6 @@
 package com.example.bank.wallets.domain;
 
+import com.example.bank.wallets.util.enums.DocumentType;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;

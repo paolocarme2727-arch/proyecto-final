@@ -92,7 +92,7 @@
                             <goal>generate</goal>
                         </goals>
                         <configuration>
-                            <inputSpec>${project.basedir}/src/main/resources/META-INF/openapi.yaml</inputSpec>
+                            <inputSpec>${project.basedir}/src/main/resources/META-INF/openapi/customer-openapi.yaml</inputSpec>
                             <generatorName>spring</generatorName>
                             <apiPackage>com.example.bank.customers.expose.web</apiPackage>
                             <modelPackage>com.example.bank.customers.expose.model</modelPackage>

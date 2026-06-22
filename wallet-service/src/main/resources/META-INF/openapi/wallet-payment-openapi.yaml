@@ -1,0 +1,58 @@
+openapi: 3.0.3
+info:
+  title: API de pagos de monedero Yanki
+  version: 1.0.0
+servers:
+  - url: http://localhost:8084
+tags:
+  - name: WalletPayment
+paths:
+  /api/v1/wallets/payments:
+    post:
+      tags: [WalletPayment]
+      operationId: sendWalletPayment
+      summary: Enviar un pago Yanki por número de celular
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WalletPaymentRequest'
+      responses:
+        '200':
+          description: Resultado del pago de monedero
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WalletPaymentResponse'
+components:
+  schemas:
+    WalletPaymentRequest:
+      type: object
+      required: [sourcePhoneNumber, targetPhoneNumber, amount]
+      properties:
+        sourcePhoneNumber:
+          type: string
+        targetPhoneNumber:
+          type: string
+        amount:
+          type: number
+          minimum: 0.01
+        description:
+          type: string
+    WalletPaymentResponse:
+      type: object
+      properties:
+        sourceWalletId:
+          type: string
+        targetWalletId:
+          type: string
+        amount:
+          type: number
+        sourceBalance:
+          type: number
+        targetBalance:
+          type: number
+        createdAt:
+          type: string
+          format: date-time

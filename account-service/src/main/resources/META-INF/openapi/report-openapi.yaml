@@ -1,0 +1,55 @@
+openapi: 3.0.3
+info:
+  title: API de reportes
+  version: 1.0.0
+servers:
+  - url: http://localhost:8082
+tags:
+  - name: Report
+paths:
+  /api/v1/accounts/reports/products/{type}:
+    get:
+      tags: [Report]
+      operationId: getAccountProductReport
+      summary: Consultar reporte general de cuentas por rango de tiempo
+      parameters:
+        - name: type
+          in: path
+          required: true
+          schema:
+            $ref: './common-openapi.yaml#/components/schemas/AccountType'
+        - name: from
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date-time
+        - name: to
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date-time
+      responses:
+        '200':
+          description: Reporte de producto de cuenta
+          content:
+            application/json:
+              schema:
+                $ref: './common-openapi.yaml#/components/schemas/AccountProductReportResponse'
+  /api/v1/accounts/{id}/debit-card/movements/recent:
+    get:
+      tags: [Report]
+      operationId: findRecentDebitCardMovements
+      summary: Listar los últimos 10 movimientos de tarjeta de débito
+      parameters:
+        - $ref: './common-openapi.yaml#/components/parameters/Id'
+      responses:
+        '200':
+          description: Movimientos recientes de tarjeta de débito
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: './common-openapi.yaml#/components/schemas/AccountMovement'
